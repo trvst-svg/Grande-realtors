@@ -1,7 +1,7 @@
 import express from "express";
 import { configDotenv } from "dotenv";
 import bodyParser from "body-parser";
-import routes from "./RouteServices";
+//import routes from "./RouteServices";
 
 const config = configDotenv();
 
