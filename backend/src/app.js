@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import landingRoutes from "./routes/landing.routes.js";
+import homeRoutes from "./routes/home.routes.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/landing", landingRoutes);
+app.use("/api/home", homeRoutes);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;
