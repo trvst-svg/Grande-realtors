@@ -1,17 +1,10 @@
-import express from "express";
 import { configDotenv } from "dotenv";
-import bodyParser from "body-parser";
-//import routes from "./RouteServices";
+import app from "./src/app.js";
 
-const config = configDotenv();
+configDotenv();
 
-const app = express();
-
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`App running on port ${port}`);
 });
-
-app.use(bodyParser);
-app.use("/grande-realtors/api", routes);

@@ -14,6 +14,7 @@ export default async function createLand(req, res) {
       road_access,
       land_dimension,
       map_link,
+      land_img_url
     } = req.body;
 
     if (
@@ -29,7 +30,8 @@ export default async function createLand(req, res) {
         road_access,
         land_dimension,
         map_link,
-      ].some((v) => !v)
+        land_img_url
+      ].some(v => !v)
     ) {
       return res.json({ error: "Missing required fields" });
     }
