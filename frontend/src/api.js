@@ -26,3 +26,12 @@ export async function signupUser(formData) {
   }
   return data;
 }
+
+export async function fetchHomeData() {
+  const response = await fetch(`${API_BASE_URL}/api/home`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load home data");
+  }
+  return data;
+}
