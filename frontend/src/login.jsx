@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "./api.js";
 import "./auth.css";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "", remember: false });
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
@@ -20,6 +21,7 @@ export default function LoginPage() {
     try {
       const data = await loginUser({ email: form.email, password: form.password });
       setStatus({ type: "success", message: data.message || "Signed in." });
+      navigate("/home");
     } catch (err) {
       setStatus({ type: "error", message: err.message });
     } finally {
