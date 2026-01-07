@@ -14,6 +14,7 @@ function buildUserPayload(user) {
     lastname: user.lastname,
     email: user.email,
     number: user.number,
+    role_id: user.role_id,
     citizenship_front: user.citizenship_front,
     citizenship_back: user.citizenship_back,
   };
@@ -86,7 +87,7 @@ export async function login(req, res, next) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const payload = { id: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, role_id: user.role_id };
     const secret =
       process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
     const token = jwt.sign(payload, secret, { expiresIn: "5h" });
