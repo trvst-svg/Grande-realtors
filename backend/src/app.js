@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import landingRoutes from "./routes/landing.routes.js";
 import homeRoutes from "./routes/home.routes.js";
+import propertyRoutes from "./routes/property.routes.js";
+import auctionRoutes from "./routes/auction.routes.js";
 
 const app = express();
 
@@ -13,6 +15,8 @@ app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads/users", express.static("useruploads"));
+app.use("/uploads/properties", express.static("propertyuploads"));
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
@@ -21,6 +25,8 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/landing", landingRoutes);
 app.use("/api/home", homeRoutes);
+app.use("/api/properties", propertyRoutes);
+app.use("/api/auctions", auctionRoutes);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;
