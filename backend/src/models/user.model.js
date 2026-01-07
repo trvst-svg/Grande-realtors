@@ -1,5 +1,12 @@
 import pool from "../config/db.js";
 
+export async function getRoleIdByName(name) {
+  const result = await pool.query("SELECT id FROM roles WHERE name = $1", [
+    name,
+  ]);
+  return result.rows[0]?.id || null;
+}
+
 export async function findUserByEmail(email) {
   const result = await pool.query("SELECT * FROM users WHERE email = $1", [
     email,
@@ -20,13 +27,14 @@ export async function createUser({
   email,
   password,
   number,
+  role_id,
   citizenshipFront,
   citizenshipBack,
 }) {
   const result = await pool.query(
     `INSERT INTO users
-      (firstname, lastname, email, password, number, citizenship_front, citizenship_back)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (firstname, lastname, email, password, number, role_id, citizenship_front, citizenship_back)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING id, firstname, lastname, email, number, citizenship_front, citizenship_back`,
     [
       firstname,
@@ -34,6 +42,7 @@ export async function createUser({
       email,
       password,
       number,
+      role_id,
       citizenshipFront,
       citizenshipBack,
     ]

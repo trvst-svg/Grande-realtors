@@ -4,6 +4,7 @@ import {
   createUser,
   findUserByEmail,
   findUserByNumber,
+  getRoleIdByName,
 } from "../models/user.model.js";
 
 function buildUserPayload(user) {
@@ -45,6 +46,7 @@ export async function signup(req, res, next) {
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const roleId = await getRoleIdByName("user");
 
     const user = await createUser({
       firstname,
@@ -52,8 +54,9 @@ export async function signup(req, res, next) {
       email,
       password: hashedPassword,
       number,
-      citizenshipFront: citizenshipFront.filename,
-      citizenshipBack: citizenshipBack.filename,
+      role_id: roleId,
+      citizenshipFront: `/uploads/users/${citizenshipFront.filename}`,
+      citizenshipBack: `/uploads/users/${citizenshipBack.filename}`,
     });
 
     return res.status(201).json({
@@ -84,7 +87,8 @@ export async function login(req, res, next) {
     }
 
     const payload = { id: user.id, email: user.email };
-    const secret = process.env.JWT_SECRET || "dev-secret";
+    const secret =
+      process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
     const token = jwt.sign(payload, secret, { expiresIn: "5h" });
 
     return res.status(200).json({

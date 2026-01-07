@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { fetchHomeData } from "./api.js";
+import { fetchHomeData, fetchProperties } from "./api.js";
 import "./home.css";
 
 export default function HomePage() {
   const [data, setData] = useState(null);
+  const [properties, setProperties] = useState([]);
 
   useEffect(() => {
     let mounted = true;
-    fetchHomeData()
-      .then((payload) => {
+    Promise.all([fetchHomeData(), fetchProperties()])
+      .then(([homePayload, propertyItems]) => {
         if (mounted) {
-          setData(payload);
+          setData(homePayload);
+          setProperties(propertyItems);
         }
       })
       .catch(() => {
@@ -71,20 +73,26 @@ export default function HomePage() {
           <button className="text-link">{data.featured.action}</button>
         </div>
         <div className="featured-grid">
-          {data.featured.items.map((item) => (
-            <article key={item.id} className="home-card">
-              <div className="card-media">
-                <span className="badge">{item.badge}</span>
-                <div className="media-block" />
-              </div>
-              <div className="card-body">
-                <p className="price">{item.price}</p>
-                <h3>{item.title}</h3>
-                <p className="location">{item.location}</p>
-                <div className="meta">{item.meta}</div>
-              </div>
-            </article>
-          ))}
+          {(properties.length ? properties.slice(0, 8) : data.featured.items).map(
+            (item) => (
+              <article key={item.id} className="home-card">
+                <div className="card-media">
+                  <span className="badge">{item.badge || "Featured"}</span>
+                  {item.image ? (
+                    <img src={item.image} alt={item.title} />
+                  ) : (
+                    <div className="media-block" />
+                  )}
+                </div>
+                <div className="card-body">
+                  <p className="price">{item.price}</p>
+                  <h3>{item.title}</h3>
+                  <p className="location">{item.location}</p>
+                  <div className="meta">{item.meta}</div>
+                </div>
+              </article>
+            )
+          )}
         </div>
       </section>
     </div>

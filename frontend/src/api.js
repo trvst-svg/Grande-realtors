@@ -35,3 +35,15 @@ export async function fetchHomeData() {
   }
   return data;
 }
+
+export async function fetchProperties(type) {
+  const endpoint = type
+    ? `${API_BASE_URL}/api/properties/type/${type}`
+    : `${API_BASE_URL}/api/properties`;
+  const response = await fetch(endpoint);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load properties");
+  }
+  return data.items || [];
+}
