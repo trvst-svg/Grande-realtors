@@ -1,0 +1,80 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap");
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 70px;
+  background: #1a1a1a;
+  color: #f7f1e8;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.site-header .brand {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #f7f1e8;
+  text-decoration: none;
+}
+
+.site-header nav {
+  display: flex;
+  gap: 24px;
+}
+
+.site-header nav a {
+  color: #cfc6b7;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-actions .ghost {
+  border: 1px solid #c9a24d;
+  padding: 8px 16px;
+  color: #c9a24d;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.header-actions .cta {
+  background: #c9a24d;
+  color: #111;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.profile-chip {
+  background: #d1a33a;
+  color: #111;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .site-header {
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 24px;
+  }
+
+  .site-header nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
