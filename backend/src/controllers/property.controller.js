@@ -8,6 +8,7 @@ import {
   getPropertyTypeIdByName,
   listProperties,
   listPropertiesByType,
+  searchProperties,
   updateProperty,
   deleteProperty,
 } from "../models/property.model.js";
@@ -77,6 +78,22 @@ export async function listPropertiesByTypeHandler(req, res, next) {
     const { type } = req.params;
     const properties = await listPropertiesByType(type);
     res.json({ items: properties });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function searchPropertiesHandler(req, res, next) {
+  try {
+    const { type, location, min_price, max_price, status } = req.query;
+    const items = await searchProperties({
+      type,
+      location,
+      min_price,
+      max_price,
+      status,
+    });
+    res.json({ items });
   } catch (err) {
     next(err);
   }
