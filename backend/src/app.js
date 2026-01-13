@@ -6,6 +6,8 @@ import landingRoutes from "./routes/landing.routes.js";
 import homeRoutes from "./routes/home.routes.js";
 import propertyRoutes from "./routes/property.routes.js";
 import auctionRoutes from "./routes/auction.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use("/api/landing", landingRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/auctions", auctionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;
