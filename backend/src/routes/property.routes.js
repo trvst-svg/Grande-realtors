@@ -6,6 +6,7 @@ import {
   getPropertyHandler,
   listPropertiesHandler,
   listPropertiesByTypeHandler,
+  searchPropertiesHandler,
   updatePropertyHandler,
 } from "../controllers/property.controller.js";
 import { uploadPropertyImages } from "../middleware/upload.middleware.js";
@@ -13,6 +14,7 @@ import { uploadPropertyImages } from "../middleware/upload.middleware.js";
 const router = Router();
 
 router.get("/", listPropertiesHandler);
+router.get("/search", searchPropertiesHandler);
 router.get("/type/:type", listPropertiesByTypeHandler);
 router.post("/", createPropertyHandler);
 router.get("/:id", getPropertyHandler);
