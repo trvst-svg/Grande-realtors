@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchProperties } from "./api.js";
+import Navbar from "./components/Navbar.jsx";
 import "./properties.css";
-
-const navItems = ["Home", "Lands", "Houses", "Bidding", "Contact"];
 
 export default function HousesPage() {
   const [items, setItems] = useState([]);
@@ -29,17 +28,7 @@ export default function HousesPage() {
 
   return (
     <div className="property-page">
-      <header className="property-header">
-        <div className="brand">Grande.</div>
-        <nav>
-          {navItems.map((item) => (
-            <a key={item} href="#">
-              {item}
-            </a>
-          ))}
-        </nav>
-        <div className="profile-chip">JD</div>
-      </header>
+      <Navbar showProfile />
 
       <section className="property-hero">
         <h1>House Properties</h1>

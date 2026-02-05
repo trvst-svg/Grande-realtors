@@ -5,13 +5,20 @@ import "./auth.css";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "", remember: false });
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    remember: false,
+  });
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -19,8 +26,14 @@ export default function LoginPage() {
     setStatus({ type: "", message: "" });
     setLoading(true);
     try {
-      const data = await loginUser({ email: form.email, password: form.password });
+      const data = await loginUser({
+        email: form.email,
+        password: form.password,
+      });
       setStatus({ type: "success", message: data.message || "Signed in." });
+      if (data.user) {
+        localStorage.setItem("gr_user", JSON.stringify(data.user));
+      }
       navigate("/home");
     } catch (err) {
       setStatus({ type: "error", message: err.message });
@@ -34,9 +47,7 @@ export default function LoginPage() {
       <div className="auth-panel">
         <div className="auth-panel-content">
           <h1 className="brand">Grande.</h1>
-          <p className="panel-copy">
-            Welcome Back to Your Real Estate Journey
-          </p>
+          <p className="panel-copy">Welcome Back to Your Real Estate Journey</p>
         </div>
       </div>
 

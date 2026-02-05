@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchHomeData, fetchProperties } from "./api.js";
+import Navbar from "./components/Navbar.jsx";
 import "./home.css";
 
 export default function HomePage() {
@@ -36,17 +37,7 @@ export default function HomePage() {
 
   return (
     <div className="home">
-      <header className="home-header">
-        <div className="brand">{data.brand}</div>
-        <nav>
-          {data.nav.map((item) => (
-            <a key={item} href="#">
-              {item}
-            </a>
-          ))}
-        </nav>
-        <div className="profile-chip">{data.profile.initials}</div>
-      </header>
+      <Navbar showProfile profileInitials={data.profile.initials} />
 
       <section className="home-section">
         <div className="section-head">
@@ -73,26 +64,27 @@ export default function HomePage() {
           <button className="text-link">{data.featured.action}</button>
         </div>
         <div className="featured-grid">
-          {(properties.length ? properties.slice(0, 8) : data.featured.items).map(
-            (item) => (
-              <article key={item.id} className="home-card">
-                <div className="card-media">
-                  <span className="badge">{item.badge || "Featured"}</span>
-                  {item.image ? (
-                    <img src={item.image} alt={item.title} />
-                  ) : (
-                    <div className="media-block" />
-                  )}
-                </div>
-                <div className="card-body">
-                  <p className="price">{item.price}</p>
-                  <h3>{item.title}</h3>
-                  <p className="location">{item.location}</p>
-                  <div className="meta">{item.meta}</div>
-                </div>
-              </article>
-            )
-          )}
+          {(properties.length
+            ? properties.slice(0, 8)
+            : data.featured.items
+          ).map((item) => (
+            <article key={item.id} className="home-card">
+              <div className="card-media">
+                <span className="badge">{item.badge || "Featured"}</span>
+                {item.image ? (
+                  <img src={item.image} alt={item.title} />
+                ) : (
+                  <div className="media-block" />
+                )}
+              </div>
+              <div className="card-body">
+                <p className="price">{item.price}</p>
+                <h3>{item.title}</h3>
+                <p className="location">{item.location}</p>
+                <div className="meta">{item.meta}</div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </div>

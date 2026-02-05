@@ -1,0 +1,257 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap");
+
+.bidding-page {
+  min-height: 100vh;
+  background: #f2ede5;
+  color: #1f1f1f;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.bidding-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 70px;
+  background: #1a1a1a;
+  color: #f7f1e8;
+}
+
+.bidding-header .brand {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #f7f1e8;
+  text-decoration: none;
+}
+
+.bidding-header nav {
+  display: flex;
+  gap: 24px;
+}
+
+.bidding-header nav a {
+  color: #cfc6b7;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.bidding-header .profile-chip {
+  background: #d1a33a;
+  color: #111;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bidding-hero {
+  padding: 30px 70px;
+}
+
+.hero-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.hero-title h1 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+}
+
+.live-pill {
+  background: #d14848;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.hero-card {
+  background: #1a1a1a;
+  color: #f7f1e8;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  padding: 24px;
+}
+
+.hero-media {
+  background: #e6d6b5;
+  border-radius: 12px;
+  min-height: 220px;
+  overflow: hidden;
+}
+
+.hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-info h2 {
+  margin: 0 0 8px;
+  font-family: "Playfair Display", serif;
+}
+
+.hero-info .meta {
+  margin: 0;
+  color: #cfc6b7;
+  font-size: 12px;
+}
+
+.hero-info h3 {
+  margin: 6px 0 12px;
+  color: #d1a33a;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stats div {
+  background: #262626;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.stats strong {
+  display: block;
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.timer {
+  background: #bf2a2a;
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.hero-info button {
+  background: #d1a33a;
+  color: #111;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.active-auctions {
+  padding: 10px 70px 60px;
+}
+
+.active-auctions h2 {
+  font-family: "Playfair Display", serif;
+  margin: 0 0 16px;
+}
+
+.auction-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.auction-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.auction-media {
+  height: 100px;
+  background: #c0d8b4;
+  position: relative;
+}
+
+.auction-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.live-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #d14848;
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.auction-body {
+  padding: 12px;
+}
+
+.auction-body h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.auction-body p {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #6d655b;
+}
+
+.auction-body .current {
+  font-size: 11px;
+  color: #9a9084;
+}
+
+.auction-body strong {
+  display: block;
+  color: #c9a24d;
+  margin: 4px 0 10px;
+}
+
+.auction-body button {
+  border: none;
+  background: #111;
+  color: #f7f1e8;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+  .hero-card {
+    grid-template-columns: 1fr;
+  }
+
+  .auction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .bidding-header {
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 24px;
+  }
+
+  .bidding-hero,
+  .active-auctions {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .auction-grid {
+    grid-template-columns: 1fr;
+  }
+}

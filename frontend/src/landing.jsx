@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Navbar from "./components/Navbar.jsx";
+import { fetchLandingData } from "./api.js";
 import "./landing.css";
 
 export default function LandingPage() {
@@ -7,8 +9,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     let mounted = true;
-    fetch("http://localhost:5000/api/landing")
-      .then((res) => res.json())
+    fetchLandingData()
       .then((payload) => {
         if (mounted) {
           setData(payload);
@@ -118,24 +119,7 @@ export default function LandingPage() {
 
   return (
     <div className="landing">
-      <header className="landing-header">
-        <div className="brand">{data.brand}</div>
-        <nav>
-          {data.nav.map((item) => (
-            <a key={item} href="#">
-              {item}
-            </a>
-          ))}
-        </nav>
-        <div className="header-actions">
-          <Link className="ghost" to="/login">
-            Login
-          </Link>
-          <Link className="cta" to="/signup">
-            Get Started
-          </Link>
-        </div>
-      </header>
+      <Navbar showAuthActions />
 
       <section className="hero">
         <div className="hero-text">
