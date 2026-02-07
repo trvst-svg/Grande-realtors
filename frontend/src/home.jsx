@@ -6,19 +6,32 @@ import "./home.css";
 export default function HomePage() {
   const [data, setData] = useState(null);
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([fetchHomeData(), fetchProperties()])
-      .then(([homePayload, propertyItems]) => {
-        if (mounted) {
-          setData(homePayload);
-          setProperties(propertyItems);
+    setLoading(true);
+    setError("");
+    Promise.allSettled([fetchHomeData(), fetchProperties()])
+      .then(([homeResult, propertyResult]) => {
+        if (!mounted) return;
+
+        if (homeResult.status === "fulfilled") {
+          setData(homeResult.value);
+        } else {
+          setError(
+            homeResult.reason?.message || "Unable to load home data right now."
+          );
+        }
+
+        if (propertyResult.status === "fulfilled") {
+          setProperties(propertyResult.value);
         }
       })
-      .catch(() => {
+      .finally(() => {
         if (mounted) {
-          setData(null);
+          setLoading(false);
         }
       });
 
@@ -27,7 +40,7 @@ export default function HomePage() {
     };
   }, []);
 
-  if (!data) {
+  if (loading) {
     return (
       <div className="home-loading">
         <p>Loading properties...</p>
@@ -35,9 +48,17 @@ export default function HomePage() {
     );
   }
 
+  if (!data) {
+    return (
+      <div className="home-loading">
+        <p>{error || "Unable to load home data."}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="home">
-      <Navbar showProfile profileInitials={data.profile.initials} />
+      <Navbar showProfile profileInitials={data.profile?.initials || "GR"} />
 
       <section className="home-section">
         <div className="section-head">

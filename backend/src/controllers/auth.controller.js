@@ -1,11 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-  createUser,
-  findUserByEmail,
-  findUserByNumber,
-  getRoleIdByName,
-} from "../models/user.model.js";
+import {createUser, findUserByEmail, findUserByNumber, getRoleIdByName} from "../models/user.model.js";
 
 function buildUserPayload(user) {
   return {
@@ -17,6 +12,7 @@ function buildUserPayload(user) {
     role_id: user.role_id,
     citizenship_front: user.citizenship_front,
     citizenship_back: user.citizenship_back,
+    approval_status: user.approval_status,
   };
 }
 
@@ -61,7 +57,7 @@ export async function signup(req, res, next) {
     });
 
     return res.status(201).json({
-      message: "User created successfully",
+      message: "Signup request submitted for approval",
       user: buildUserPayload(user),
     });
   } catch (err) {
@@ -80,6 +76,20 @@ export async function login(req, res, next) {
     const user = await findUserByEmail(email);
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    if (user.approval_status === "pending") {
+      return res
+        .status(403)
+        .json({ error: "Your account is pending admin approval." });
+    }
+
+    if (user.approval_status === "rejected") {
+      const reason =
+        user.approval_reason || "Please contact support for details.";
+      return res
+        .status(403)
+        .json({ error: `Your signup was rejected. ${reason}` });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

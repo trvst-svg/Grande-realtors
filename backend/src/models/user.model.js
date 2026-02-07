@@ -21,6 +21,13 @@ export async function findUserByNumber(number) {
   return result.rows[0];
 }
 
+export async function getUserById(userId) {
+  const result = await pool.query("SELECT * FROM users WHERE id = $1", [
+    userId,
+  ]);
+  return result.rows[0];
+}
+
 export async function createUser({
   firstname,
   lastname,
@@ -30,12 +37,13 @@ export async function createUser({
   role_id,
   citizenshipFront,
   citizenshipBack,
+  approval_status = "pending",
 }) {
   const result = await pool.query(
     `INSERT INTO users
-      (firstname, lastname, email, password, number, role_id, citizenship_front, citizenship_back)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING id, firstname, lastname, email, number, citizenship_front, citizenship_back`,
+      (firstname, lastname, email, password, number, role_id, citizenship_front, citizenship_back, approval_status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING id, firstname, lastname, email, number, citizenship_front, citizenship_back, approval_status`,
     [
       firstname,
       lastname,
@@ -45,9 +53,51 @@ export async function createUser({
       role_id,
       citizenshipFront,
       citizenshipBack,
+      approval_status,
     ]
   );
 
+  return result.rows[0];
+}
+
+export async function listPendingUsers() {
+  const result = await pool.query(
+    `SELECT id, firstname, lastname, email, number, created_at,
+            citizenship_front, citizenship_back, approval_status
+     FROM users
+     WHERE approval_status = 'pending'
+     ORDER BY created_at ASC`
+  );
+  return result.rows;
+}
+
+export async function approveUser(userId, reviewedBy = null) {
+  const result = await pool.query(
+    `UPDATE users
+     SET approval_status = 'approved',
+         approval_reason = NULL,
+         approved_at = NOW(),
+         rejected_at = NULL,
+         reviewed_by = $2
+     WHERE id = $1
+     RETURNING id, firstname, lastname, email, approval_status`,
+    [userId, reviewedBy]
+  );
+  return result.rows[0];
+}
+
+export async function rejectUser(userId, reason, reviewedBy = null) {
+  const result = await pool.query(
+    `UPDATE users
+     SET approval_status = 'rejected',
+         approval_reason = $2,
+         rejected_at = NOW(),
+         approved_at = NULL,
+         reviewed_by = $3
+     WHERE id = $1
+     RETURNING id, firstname, lastname, email, approval_status, approval_reason`,
+    [userId, reason, reviewedBy]
+  );
   return result.rows[0];
 }
 

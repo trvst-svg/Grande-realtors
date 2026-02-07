@@ -1,4 +1,4 @@
-const API_BASE_URL =
+export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export async function loginUser(payload) {
@@ -72,6 +72,43 @@ export async function fetchAdminDashboard() {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load admin dashboard");
+  }
+  return data;
+}
+
+export async function fetchSignupRequests() {
+  const response = await fetch(`${API_BASE_URL}/api/admin/signup-requests`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load signup requests");
+  }
+  return data.items || [];
+}
+
+export async function approveSignupRequest(userId) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/signup-requests/${userId}/approve`,
+    { method: "POST" }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to approve signup");
+  }
+  return data;
+}
+
+export async function rejectSignupRequest(userId, reason) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/signup-requests/${userId}/reject`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason }),
+    }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to reject signup");
   }
   return data;
 }

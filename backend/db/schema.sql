@@ -19,6 +19,11 @@ CREATE TABLE users (
   role_id INTEGER REFERENCES roles(id),
   citizenship_front VARCHAR(255),
   citizenship_back VARCHAR(255),
+  approval_status VARCHAR(50) DEFAULT 'approved',
+  approval_reason TEXT,
+  approved_at TIMESTAMP WITHOUT TIME ZONE,
+  rejected_at TIMESTAMP WITHOUT TIME ZONE,
+  reviewed_by INTEGER REFERENCES users(id),
   created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );

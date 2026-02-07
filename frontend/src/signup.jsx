@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { signupUser } from "./api.js";
 import "./auth.css";
 
@@ -15,7 +15,6 @@ const initialForm = {
 };
 
 export default function SignupPage() {
-  const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
@@ -57,9 +56,11 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const data = await signupUser(payload);
-      setStatus({ type: "success", message: data.message || "Account created." });
+      setStatus({
+        type: "success",
+        message: data.message || "Signup request submitted for approval.",
+      });
       setForm(initialForm);
-      navigate("/login");
     } catch (err) {
       setStatus({ type: "error", message: err.message });
     } finally {
