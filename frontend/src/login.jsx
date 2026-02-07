@@ -34,6 +34,9 @@ export default function LoginPage() {
       if (data.user) {
         localStorage.setItem("gr_user", JSON.stringify(data.user));
       }
+      if (data.token) {
+        localStorage.setItem("gr_token", data.token);
+      }
       navigate("/home");
     } catch (err) {
       setStatus({ type: "error", message: err.message });
