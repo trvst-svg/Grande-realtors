@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { loginUser } from "./api.js";
 import "./auth.css";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -12,6 +13,12 @@ export default function LoginPage() {
   });
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setStatus({ type: "success", message: location.state.message });
+    }
+  }, [location.state]);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;

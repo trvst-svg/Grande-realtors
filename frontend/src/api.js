@@ -1,6 +1,17 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
+function getAuthToken() {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("gr_token");
+}
+
+function withAuthHeaders(headers = {}) {
+  const token = getAuthToken();
+  if (!token) return headers;
+  return { ...headers, Authorization: `Bearer ${token}` };
+}
+
 export async function loginUser(payload) {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",
@@ -68,7 +79,9 @@ export async function fetchLandingData() {
 }
 
 export async function fetchAdminDashboard() {
-  const response = await fetch(`${API_BASE_URL}/api/dashboard/admin`);
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/admin`, {
+    headers: withAuthHeaders(),
+  });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load admin dashboard");
@@ -77,7 +90,9 @@ export async function fetchAdminDashboard() {
 }
 
 export async function fetchSignupRequests() {
-  const response = await fetch(`${API_BASE_URL}/api/admin/signup-requests`);
+  const response = await fetch(`${API_BASE_URL}/api/admin/signup-requests`, {
+    headers: withAuthHeaders(),
+  });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load signup requests");
@@ -88,7 +103,7 @@ export async function fetchSignupRequests() {
 export async function approveSignupRequest(userId) {
   const response = await fetch(
     `${API_BASE_URL}/api/admin/signup-requests/${userId}/approve`,
-    { method: "POST" }
+    { method: "POST", headers: withAuthHeaders() }
   );
   const data = await response.json();
   if (!response.ok) {
@@ -102,7 +117,7 @@ export async function rejectSignupRequest(userId, reason) {
     `${API_BASE_URL}/api/admin/signup-requests/${userId}/reject`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: withAuthHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ reason }),
     }
   );
@@ -114,7 +129,10 @@ export async function rejectSignupRequest(userId, reason) {
 }
 
 export async function fetchAgentDashboard(agentId) {
-  const response = await fetch(`${API_BASE_URL}/api/dashboard/agent/${agentId}`);
+  const response = await fetch(
+    `${API_BASE_URL}/api/dashboard/agent/${agentId}`,
+    { headers: withAuthHeaders() }
+  );
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load agent dashboard");
@@ -123,7 +141,9 @@ export async function fetchAgentDashboard(agentId) {
 }
 
 export async function fetchUserDashboard(userId) {
-  const response = await fetch(`${API_BASE_URL}/api/dashboard/user/${userId}`);
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/user/${userId}`, {
+    headers: withAuthHeaders(),
+  });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load user dashboard");
@@ -132,7 +152,9 @@ export async function fetchUserDashboard(userId) {
 }
 
 export async function fetchUserProfile(userId) {
-  const response = await fetch(`${API_BASE_URL}/api/users/${userId}/profile`);
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}/profile`, {
+    headers: withAuthHeaders(),
+  });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load profile");

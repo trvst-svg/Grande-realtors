@@ -37,8 +37,8 @@ export async function createUser({
   role_id,
   citizenshipFront,
   citizenshipBack,
-  approval_status = "pending",
 }) {
+  const approvalStatus = "pending";
   const result = await pool.query(
     `INSERT INTO users
       (firstname, lastname, email, password, number, role_id, citizenship_front, citizenship_back, approval_status)
@@ -53,7 +53,7 @@ export async function createUser({
       role_id,
       citizenshipFront,
       citizenshipBack,
-      approval_status,
+      approvalStatus,
     ]
   );
 
@@ -79,7 +79,7 @@ export async function approveUser(userId, reviewedBy = null) {
          approved_at = NOW(),
          rejected_at = NULL,
          reviewed_by = $2
-     WHERE id = $1
+     WHERE id = $1 AND approval_status = 'pending'
      RETURNING id, firstname, lastname, email, approval_status`,
     [userId, reviewedBy]
   );
@@ -94,7 +94,7 @@ export async function rejectUser(userId, reason, reviewedBy = null) {
          rejected_at = NOW(),
          approved_at = NULL,
          reviewed_by = $3
-     WHERE id = $1
+     WHERE id = $1 AND approval_status = 'pending'
      RETURNING id, firstname, lastname, email, approval_status, approval_reason`,
     [userId, reason, reviewedBy]
   );

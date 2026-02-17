@@ -1,18 +1,39 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { fetchUserProfile } from "./api.js";
 import "./profile.css";
 
-const fallbackUserId = 1;
-
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("gr_token");
     const stored = JSON.parse(localStorage.getItem("gr_user") || "{}");
-    const userId = stored.id || fallbackUserId;
-    fetchUserProfile(userId).then(setData).catch(() => setData(null));
-  }, []);
+    if (!token || !stored.id) {
+      navigate("/login");
+      return;
+    }
+
+    fetchUserProfile(stored.id)
+      .then(setData)
+      .catch((err) => {
+        const message = err?.message || "Unable to load profile data.";
+        if (
+          message.toLowerCase().includes("authorization") ||
+          message.toLowerCase().includes("forbidden")
+        ) {
+          localStorage.removeItem("gr_token");
+          localStorage.removeItem("gr_user");
+          navigate("/login");
+          return;
+        }
+        setError(message);
+        setData(null);
+      });
+  }, [navigate]);
 
   if (!data) {
     return (
@@ -20,7 +41,7 @@ export default function ProfilePage() {
         <Navbar showProfile />
         <div className="profile-empty">
           <h1>Profile</h1>
-          <p>Unable to load profile data.</p>
+          <p>{error || "Unable to load profile data."}</p>
         </div>
       </div>
     );

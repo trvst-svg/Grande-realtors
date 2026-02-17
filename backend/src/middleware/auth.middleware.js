@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import { getRoleIdByName } from "../models/user.model.js";
 
-const SECRET = process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
-
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
@@ -12,7 +10,9 @@ export function requireAuth(req, res, next) {
   }
 
   try {
-    const payload = jwt.verify(token, SECRET);
+    const secret =
+      process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
+    const payload = jwt.verify(token, secret);
     req.user = payload;
     return next();
   } catch (err) {

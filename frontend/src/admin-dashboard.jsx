@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import {
   API_BASE_URL,
@@ -10,6 +11,7 @@ import {
 import "./dashboard.css";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
@@ -21,6 +23,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     let mounted = true;
+    const token = localStorage.getItem("gr_token");
+    if (!token) {
+      navigate("/login");
+      return () => {
+        mounted = false;
+      };
+    }
     setLoading(true);
     setRequestsLoading(true);
     setRequestsError("");
@@ -32,6 +41,15 @@ export default function AdminDashboard() {
         if (dashboardResult.status === "fulfilled") {
           setData(dashboardResult.value);
         } else {
+          const message = dashboardResult.reason?.message || "";
+          if (
+            message.toLowerCase().includes("authorization") ||
+            message.toLowerCase().includes("forbidden")
+          ) {
+            localStorage.removeItem("gr_token");
+            navigate("/login");
+            return;
+          }
           setData(null);
         }
 
@@ -54,7 +72,7 @@ export default function AdminDashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [navigate]);
 
   const handleReasonChange = (userId, value) => {
     setRejectionReasons((prev) => ({ ...prev, [userId]: value }));

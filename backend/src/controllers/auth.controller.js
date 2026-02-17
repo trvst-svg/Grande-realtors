@@ -1,6 +1,22 @@
 import bcrypt from "bcrypt";
+import fs from "fs/promises";
 import jwt from "jsonwebtoken";
-import {createUser, findUserByEmail, findUserByNumber, getRoleIdByName} from "../models/user.model.js";
+import {
+  createUser,
+  findUserByEmail,
+  findUserByNumber,
+  getRoleIdByName,
+} from "../models/user.model.js";
+
+async function cleanupUploads(files = []) {
+  await Promise.all(
+    files.map((filePath) =>
+      fs.unlink(filePath).catch(() => {
+        /* ignore cleanup errors */
+      })
+    )
+  );
+}
 
 function buildUserPayload(user) {
   return {
@@ -18,7 +34,11 @@ function buildUserPayload(user) {
 
 export async function signup(req, res, next) {
   try {
-    const { firstname, lastname, email, password, number } = req.body;
+    const firstname = req.body.firstname?.trim();
+    const lastname = req.body.lastname?.trim();
+    const email = req.body.email?.trim();
+    const password = req.body.password;
+    const number = req.body.number?.trim();
     const files = req.files || {};
     const citizenshipFront = files.citizenshipFront?.[0];
     const citizenshipBack = files.citizenshipBack?.[0];
@@ -31,19 +51,30 @@ export async function signup(req, res, next) {
       return res.status(400).json({ error: "Citizenship images are required" });
     }
 
+    const uploadPaths = [citizenshipFront, citizenshipBack]
+      .filter(Boolean)
+      .map((file) => file.path)
+      .filter(Boolean);
+
     const existingEmail = await findUserByEmail(email);
     if (existingEmail) {
+      await cleanupUploads(uploadPaths);
       return res.status(409).json({ error: "Email already in use" });
     }
 
     const existingNumber = await findUserByNumber(number);
     if (existingNumber) {
+      await cleanupUploads(uploadPaths);
       return res.status(409).json({ error: "Phone number already in use" });
     }
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const roleId = await getRoleIdByName("user");
+    if (!roleId) {
+      await cleanupUploads(uploadPaths);
+      return res.status(500).json({ error: "User role not configured" });
+    }
 
     const user = await createUser({
       firstname,
@@ -61,13 +92,22 @@ export async function signup(req, res, next) {
       user: buildUserPayload(user),
     });
   } catch (err) {
+    const files = req.files || {};
+    const uploadPaths = [files.citizenshipFront?.[0], files.citizenshipBack?.[0]]
+      .filter(Boolean)
+      .map((file) => file.path)
+      .filter(Boolean);
+    if (uploadPaths.length) {
+      await cleanupUploads(uploadPaths);
+    }
     return next(err);
   }
 }
 
 export async function login(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.trim();
+    const password = req.body.password;
 
     if ([email, password].some((v) => !v)) {
       return res.status(400).json({ error: "Missing required fields" });

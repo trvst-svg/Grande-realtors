@@ -22,9 +22,9 @@ export async function approveSignup(req, res, next) {
       return res.status(400).json({ error: "User id is required" });
     }
 
-    const user = await approveUser(userId);
+    const user = await approveUser(userId, req.user?.id || null);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(409).json({ error: "Signup already reviewed or missing" });
     }
 
     return res.json({ message: "User approved", user });
@@ -50,6 +50,9 @@ export async function rejectSignup(req, res, next) {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    if (user.approval_status !== "pending") {
+      return res.status(409).json({ error: "Signup already reviewed" });
+    }
 
     try {
       await sendRejectionEmail({
@@ -66,7 +69,10 @@ export async function rejectSignup(req, res, next) {
       return next(emailError);
     }
 
-    const updated = await rejectUser(userId, reason.trim());
+    const updated = await rejectUser(userId, reason.trim(), req.user?.id || null);
+    if (!updated) {
+      return res.status(409).json({ error: "Signup already reviewed or missing" });
+    }
     return res.json({ message: "User rejected and email sent", user: updated });
   } catch (err) {
     return next(err);

@@ -1,23 +1,44 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { fetchUserDashboard } from "./api.js";
 import "./dashboard.css";
 
-const fallbackUserId = 1;
-
 export default function UserDashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("gr_token");
     const stored = JSON.parse(localStorage.getItem("gr_user") || "{}");
-    const userId = stored.id || fallbackUserId;
-    fetchUserDashboard(userId).then(setData).catch(() => setData(null));
-  }, []);
+    if (!token || !stored.id) {
+      navigate("/login");
+      return;
+    }
+
+    fetchUserDashboard(stored.id)
+      .then(setData)
+      .catch((err) => {
+        const message = err?.message || "Unable to load user dashboard.";
+        if (
+          message.toLowerCase().includes("authorization") ||
+          message.toLowerCase().includes("forbidden")
+        ) {
+          localStorage.removeItem("gr_token");
+          localStorage.removeItem("gr_user");
+          navigate("/login");
+          return;
+        }
+        setError(message);
+        setData(null);
+      });
+  }, [navigate]);
 
   if (!data) {
     return (
       <div className="dashboard-loading">
-        <p>Loading user dashboard...</p>
+        <p>{error || "Loading user dashboard..."}</p>
       </div>
     );
   }

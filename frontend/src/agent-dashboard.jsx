@@ -1,23 +1,44 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { fetchAgentDashboard } from "./api.js";
 import "./dashboard.css";
 
-const fallbackAgentId = 1;
-
 export default function AgentDashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("gr_token");
     const stored = JSON.parse(localStorage.getItem("gr_user") || "{}");
-    const agentId = stored.id || fallbackAgentId;
-    fetchAgentDashboard(agentId).then(setData).catch(() => setData(null));
-  }, []);
+    if (!token || !stored.id) {
+      navigate("/login");
+      return;
+    }
+
+    fetchAgentDashboard(stored.id)
+      .then(setData)
+      .catch((err) => {
+        const message = err?.message || "Unable to load agent dashboard.";
+        if (
+          message.toLowerCase().includes("authorization") ||
+          message.toLowerCase().includes("forbidden")
+        ) {
+          localStorage.removeItem("gr_token");
+          localStorage.removeItem("gr_user");
+          navigate("/login");
+          return;
+        }
+        setError(message);
+        setData(null);
+      });
+  }, [navigate]);
 
   if (!data) {
     return (
       <div className="dashboard-loading">
-        <p>Loading agent dashboard...</p>
+        <p>{error || "Loading agent dashboard..."}</p>
       </div>
     );
   }
