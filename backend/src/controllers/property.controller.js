@@ -3,6 +3,7 @@ import {
   createHouseDetails,
   createLandDetails,
   createProperty,
+  createPropertyVerificationRequest,
   getPropertyById,
   getPropertyImages,
   getPropertyTypeIdByName,
@@ -46,6 +47,8 @@ export async function createPropertyHandler(req, res, next) {
       price,
       sale_status: sale_status || "available",
     });
+
+    await createPropertyVerificationRequest(property.id);
 
     if (property_type === "land" && land) {
       await createLandDetails({ property_id: property.id, ...land });

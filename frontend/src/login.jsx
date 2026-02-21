@@ -44,7 +44,14 @@ export default function LoginPage() {
       if (data.token) {
         localStorage.setItem("gr_token", data.token);
       }
-      navigate("/home");
+      const role = data.user?.role;
+      if (role === "admin") {
+        navigate("/dashboard/admin");
+      } else if (role === "agent") {
+        navigate("/dashboard/agent");
+      } else {
+        navigate("/home");
+      }
     } catch (err) {
       setStatus({ type: "error", message: err.message });
     } finally {

@@ -7,6 +7,12 @@ export async function getRoleIdByName(name) {
   return result.rows[0]?.id || null;
 }
 
+export async function getRoleNameById(id) {
+  if (!id) return null;
+  const result = await pool.query("SELECT name FROM roles WHERE id = $1", [id]);
+  return result.rows[0]?.name || null;
+}
+
 export async function findUserByEmail(email) {
   const result = await pool.query("SELECT * FROM users WHERE email = $1", [
     email,

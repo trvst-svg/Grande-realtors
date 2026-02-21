@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./navbar.css";
 
 const navItems = [
@@ -14,6 +14,16 @@ export default function Navbar({
   showProfile = false,
   profileInitials = "JD",
 }) {
+  const navigate = useNavigate();
+  const hasToken =
+    typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("gr_token");
+    localStorage.removeItem("gr_user");
+    navigate("/login");
+  };
+
   return (
     <header className="site-header">
       <Link className="brand" to="/home">
@@ -27,7 +37,7 @@ export default function Navbar({
         ))}
       </nav>
       <div className="header-actions">
-        {showAuthActions ? (
+        {showAuthActions && !hasToken ? (
           <>
             <Link className="ghost" to="/login">
               Login
@@ -37,7 +47,12 @@ export default function Navbar({
             </Link>
           </>
         ) : null}
-        {showProfile ? (
+        {hasToken ? (
+          <button className="logout-btn" type="button" onClick={handleLogout}>
+            Logout
+          </button>
+        ) : null}
+        {showProfile && hasToken ? (
           <Link className="profile-chip" to="/profile">
             {profileInitials}
           </Link>

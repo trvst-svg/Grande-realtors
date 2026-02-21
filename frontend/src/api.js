@@ -100,6 +100,17 @@ export async function fetchSignupRequests() {
   return data.items || [];
 }
 
+export async function fetchPropertyRequests() {
+  const response = await fetch(`${API_BASE_URL}/api/admin/property-requests`, {
+    headers: withAuthHeaders(),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load property requests");
+  }
+  return data.items || [];
+}
+
 export async function approveSignupRequest(userId) {
   const response = await fetch(
     `${API_BASE_URL}/api/admin/signup-requests/${userId}/approve`,
@@ -124,6 +135,30 @@ export async function rejectSignupRequest(userId, reason) {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to reject signup");
+  }
+  return data;
+}
+
+export async function approvePropertyRequest(requestId) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/property-requests/${requestId}/approve`,
+    { method: "POST", headers: withAuthHeaders() }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to approve property");
+  }
+  return data;
+}
+
+export async function rejectPropertyRequest(requestId) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/admin/property-requests/${requestId}/reject`,
+    { method: "POST", headers: withAuthHeaders() }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to reject property");
   }
   return data;
 }

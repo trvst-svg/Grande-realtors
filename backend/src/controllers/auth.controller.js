@@ -5,6 +5,7 @@ import {
   createUser,
   findUserByEmail,
   findUserByNumber,
+  getRoleNameById,
   getRoleIdByName,
 } from "../models/user.model.js";
 
@@ -18,7 +19,7 @@ async function cleanupUploads(files = []) {
   );
 }
 
-function buildUserPayload(user) {
+function buildUserPayload(user, roleName) {
   return {
     id: user.id,
     firstname: user.firstname,
@@ -26,6 +27,7 @@ function buildUserPayload(user) {
     email: user.email,
     number: user.number,
     role_id: user.role_id,
+    role: roleName || null,
     citizenship_front: user.citizenship_front,
     citizenship_back: user.citizenship_back,
     approval_status: user.approval_status,
@@ -87,9 +89,10 @@ export async function signup(req, res, next) {
       citizenshipBack: `/uploads/users/${citizenshipBack.filename}`,
     });
 
+    const roleName = await getRoleNameById(user.role_id);
     return res.status(201).json({
       message: "Signup request submitted for approval",
-      user: buildUserPayload(user),
+      user: buildUserPayload(user, roleName),
     });
   } catch (err) {
     const files = req.files || {};
@@ -137,6 +140,7 @@ export async function login(req, res, next) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    const roleName = await getRoleNameById(user.role_id);
     const payload = { id: user.id, email: user.email, role_id: user.role_id };
     const secret =
       process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
@@ -145,7 +149,7 @@ export async function login(req, res, next) {
     return res.status(200).json({
       message: "Login successful",
       token,
-      user: buildUserPayload(user),
+      user: buildUserPayload(user, roleName),
     });
   } catch (err) {
     return next(err);

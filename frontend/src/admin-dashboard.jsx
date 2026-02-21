@@ -1,41 +1,29 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "./components/Navbar.jsx";
-import {
-  API_BASE_URL,
-  approveSignupRequest,
-  fetchAdminDashboard,
-  fetchSignupRequests,
-  rejectSignupRequest,
-} from "./api.js";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchAdminDashboard, fetchPropertyRequests, fetchSignupRequests } from "./api.js";
+import AdminShell from "./components/AdminShell.jsx";
 import "./dashboard.css";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [requests, setRequests] = useState([]);
-  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
+  const [pendingUsers, setPendingUsers] = useState(0);
+  const [pendingProperties, setPendingProperties] = useState(0);
   const [requestsError, setRequestsError] = useState("");
-  const [rejectionReasons, setRejectionReasons] = useState({});
-  const [actionStatus, setActionStatus] = useState({ type: "", message: "" });
-  const [actioningId, setActioningId] = useState(null);
 
   useEffect(() => {
     let mounted = true;
-    const token = localStorage.getItem("gr_token");
-    if (!token) {
-      navigate("/login");
-      return () => {
-        mounted = false;
-      };
-    }
     setLoading(true);
-    setRequestsLoading(true);
+    setDashboardError("");
     setRequestsError("");
 
-    Promise.allSettled([fetchAdminDashboard(), fetchSignupRequests()])
-      .then(([dashboardResult, requestsResult]) => {
+    Promise.allSettled([
+      fetchAdminDashboard(),
+      fetchSignupRequests(),
+      fetchPropertyRequests(),
+    ])
+      .then(([dashboardResult, userRequests, propertyRequests]) => {
         if (!mounted) return;
 
         if (dashboardResult.status === "fulfilled") {
@@ -47,94 +35,75 @@ export default function AdminDashboard() {
             message.toLowerCase().includes("forbidden")
           ) {
             localStorage.removeItem("gr_token");
-            navigate("/login");
+            localStorage.removeItem("gr_user");
+            window.location.href = "/login";
             return;
           }
+          setDashboardError(
+            dashboardResult.reason?.message || "Unable to load dashboard."
+          );
           setData(null);
         }
 
-        if (requestsResult.status === "fulfilled") {
-          setRequests(requestsResult.value);
+        if (userRequests.status === "fulfilled") {
+          setPendingUsers(userRequests.value.length);
         } else {
           setRequestsError(
-            requestsResult.reason?.message ||
-              "Unable to load signup requests."
+            userRequests.reason?.message || "Unable to load signup requests."
+          );
+        }
+
+        if (propertyRequests.status === "fulfilled") {
+          setPendingProperties(propertyRequests.value.length);
+        } else {
+          setRequestsError(
+            propertyRequests.reason?.message ||
+              "Unable to load property requests."
           );
         }
       })
       .finally(() => {
         if (mounted) {
           setLoading(false);
-          setRequestsLoading(false);
         }
       });
 
     return () => {
       mounted = false;
     };
-  }, [navigate]);
+  }, []);
 
-  const handleReasonChange = (userId, value) => {
-    setRejectionReasons((prev) => ({ ...prev, [userId]: value }));
-  };
+  const chartData = useMemo(() => {
+    if (!data?.stats) return [];
+    return [
+      { label: "Users", value: data.stats.users },
+      { label: "Properties", value: data.stats.properties },
+      { label: "Auctions", value: data.stats.auctions },
+      { label: "Bids", value: data.stats.bids },
+    ];
+  }, [data]);
 
-  const handleApprove = async (userId) => {
-    setActionStatus({ type: "", message: "" });
-    setActioningId(userId);
-    try {
-      await approveSignupRequest(userId);
-      setRequests((prev) => prev.filter((user) => user.id !== userId));
-      setActionStatus({ type: "success", message: "User approved." });
-    } catch (err) {
-      setActionStatus({ type: "error", message: err.message });
-    } finally {
-      setActioningId(null);
-    }
-  };
-
-  const handleReject = async (userId) => {
-    const reason = rejectionReasons[userId] || "";
-    if (!reason.trim()) {
-      setActionStatus({
-        type: "error",
-        message: "Please provide a rejection reason before sending.",
-      });
-      return;
-    }
-
-    setActionStatus({ type: "", message: "" });
-    setActioningId(userId);
-    try {
-      await rejectSignupRequest(userId, reason.trim());
-      setRequests((prev) => prev.filter((user) => user.id !== userId));
-      setActionStatus({
-        type: "success",
-        message: "User rejected and email sent.",
-      });
-    } catch (err) {
-      setActionStatus({ type: "error", message: err.message });
-    } finally {
-      setActioningId(null);
-    }
-  };
+  const chartMax = useMemo(() => {
+    if (!chartData.length) return 1;
+    return Math.max(...chartData.map((item) => item.value), 1);
+  }, [chartData]);
 
   if (loading || !data) {
     return (
-      <div className="dashboard-loading">
-        <p>{loading ? "Loading admin dashboard..." : "Unable to load dashboard."}</p>
-      </div>
+      <AdminShell title="Overview" subtitle="System performance and approvals.">
+        <div className="dashboard-loading">
+          <p>
+            {loading
+              ? "Loading admin dashboard..."
+              : dashboardError || "Unable to load dashboard."}
+          </p>
+        </div>
+      </AdminShell>
     );
   }
 
   return (
-    <div className="dashboard-page">
-      <Navbar showProfile />
-
-      <section className="dashboard-hero">
-        <h1>Admin Dashboard</h1>
-        <p>System overview, users, and property activity.</p>
-      </section>
-
+    <AdminShell title="Overview" subtitle="System performance and approvals.">
       <section className="dashboard-cards">
         <div className="dash-card">
           <span>Total Users</span>
@@ -151,6 +120,53 @@ export default function AdminDashboard() {
         <div className="dash-card">
           <span>Total Bids</span>
           <strong>{data.stats.bids}</strong>
+        </div>
+      </section>
+
+      <section className="admin-charts">
+        <div className="panel">
+          <h2>Platform Activity</h2>
+          <p className="muted">Relative activity across core areas.</p>
+          <div className="chart-list">
+            {chartData.map((item) => (
+              <div key={item.label} className="chart-row">
+                <span>{item.label}</span>
+                <div className="chart-bar">
+                  <span
+                    style={{
+                      width: `${Math.round((item.value / chartMax) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="panel">
+          <h2>Pending Approvals</h2>
+          <p className="muted">
+            {requestsError || "Track approvals waiting for review."}
+          </p>
+          <div className="approval-grid">
+            <div className="approval-card">
+              <span>User Requests</span>
+              <strong>{pendingUsers}</strong>
+              <p className="muted">Verify new user signups.</p>
+              <Link className="text-link" to="/dashboard/admin/users">
+                Review users →
+              </Link>
+            </div>
+            <div className="approval-card">
+              <span>Property Requests</span>
+              <strong>{pendingProperties}</strong>
+              <p className="muted">Approve property listings.</p>
+              <Link className="text-link" to="/dashboard/admin/properties">
+                Review properties →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -193,101 +209,6 @@ export default function AdminDashboard() {
           )}
         </div>
       </section>
-
-      <section className="dashboard-requests">
-        <div className="panel">
-          <h2>Signup Requests</h2>
-          <p className="muted">
-            Review new users before they can access the platform.
-          </p>
-
-          {actionStatus.message ? (
-            <p className={`status ${actionStatus.type}`}>{actionStatus.message}</p>
-          ) : null}
-
-          {requestsLoading ? (
-            <p className="muted">Loading signup requests...</p>
-          ) : requestsError ? (
-            <p className="muted">{requestsError}</p>
-          ) : requests.length ? (
-            <div className="request-list">
-              {requests.map((user) => {
-                const frontUrl = user.citizenship_front
-                  ? `${API_BASE_URL}${user.citizenship_front}`
-                  : "";
-                const backUrl = user.citizenship_back
-                  ? `${API_BASE_URL}${user.citizenship_back}`
-                  : "";
-
-                return (
-                  <div key={user.id} className="request-card">
-                    <div className="request-header">
-                      <div>
-                        <strong>
-                          {user.firstname} {user.lastname}
-                        </strong>
-                        <span>{user.email}</span>
-                        <span>{user.number}</span>
-                      </div>
-                      <span className="muted">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className="request-images">
-                      {frontUrl ? (
-                        <a href={frontUrl} target="_blank" rel="noreferrer">
-                          <img src={frontUrl} alt="Citizenship front" />
-                        </a>
-                      ) : (
-                        <div className="image-placeholder">No front image</div>
-                      )}
-                      {backUrl ? (
-                        <a href={backUrl} target="_blank" rel="noreferrer">
-                          <img src={backUrl} alt="Citizenship back" />
-                        </a>
-                      ) : (
-                        <div className="image-placeholder">No back image</div>
-                      )}
-                    </div>
-
-                    <div className="request-actions">
-                      <textarea
-                        rows={2}
-                        placeholder="Reason for rejection (required)"
-                        value={rejectionReasons[user.id] || ""}
-                        onChange={(event) =>
-                          handleReasonChange(user.id, event.target.value)
-                        }
-                      />
-                      <div className="request-buttons">
-                        <button
-                          type="button"
-                          className="approve-btn"
-                          onClick={() => handleApprove(user.id)}
-                          disabled={actioningId === user.id}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          className="reject-btn"
-                          onClick={() => handleReject(user.id)}
-                          disabled={actioningId === user.id}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="muted">No pending signup requests.</p>
-          )}
-        </div>
-      </section>
-    </div>
+    </AdminShell>
   );
 }

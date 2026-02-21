@@ -4,6 +4,11 @@ import {
   listPendingUsers,
   rejectUser,
 } from "../models/user.model.js";
+import {
+  approvePropertyVerificationRequest,
+  listPendingPropertyVerificationRequests,
+  rejectPropertyVerificationRequest,
+} from "../models/property.model.js";
 import { sendRejectionEmail } from "../utils/mailer.js";
 
 export async function getSignupRequests(_req, res, next) {
@@ -74,6 +79,51 @@ export async function rejectSignup(req, res, next) {
       return res.status(409).json({ error: "Signup already reviewed or missing" });
     }
     return res.json({ message: "User rejected and email sent", user: updated });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function getPropertyRequests(_req, res, next) {
+  try {
+    const items = await listPendingPropertyVerificationRequests();
+    res.json({ items });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function approvePropertyRequest(req, res, next) {
+  try {
+    const requestId = Number(req.params.id);
+    if (!requestId) {
+      return res.status(400).json({ error: "Request id is required" });
+    }
+    const updated = await approvePropertyVerificationRequest(requestId);
+    if (!updated) {
+      return res
+        .status(409)
+        .json({ error: "Request already reviewed or missing" });
+    }
+    return res.json({ message: "Property approved", request: updated });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function rejectPropertyRequest(req, res, next) {
+  try {
+    const requestId = Number(req.params.id);
+    if (!requestId) {
+      return res.status(400).json({ error: "Request id is required" });
+    }
+    const updated = await rejectPropertyVerificationRequest(requestId);
+    if (!updated) {
+      return res
+        .status(409)
+        .json({ error: "Request already reviewed or missing" });
+    }
+    return res.json({ message: "Property rejected", request: updated });
   } catch (err) {
     return next(err);
   }

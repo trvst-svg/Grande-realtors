@@ -54,6 +54,20 @@
   font-weight: 600;
 }
 
+.logout-btn {
+  border: 1px solid #f7f1e8;
+  background: transparent;
+  color: #f7f1e8;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: rgba(247, 241, 232, 0.12);
+}
+
 .profile-chip {
   background: #d1a33a;
   color: #111;
