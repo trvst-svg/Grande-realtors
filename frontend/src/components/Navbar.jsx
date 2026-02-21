@@ -48,6 +48,11 @@ export default function Navbar({
           </>
         ) : null}
         {hasToken ? (
+          <Link className="list-btn" to="/list-property">
+            List Property
+          </Link>
+        ) : null}
+        {hasToken ? (
           <button className="logout-btn" type="button" onClick={handleLogout}>
             Logout
           </button>

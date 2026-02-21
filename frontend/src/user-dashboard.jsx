@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { fetchUserDashboard } from "./api.js";
 import "./dashboard.css";
@@ -50,6 +51,9 @@ export default function UserDashboard() {
       <section className="dashboard-hero">
         <h1>My Dashboard</h1>
         <p>Your properties, favorites, and active bids.</p>
+        <Link className="dashboard-action" to="/list-property">
+          List a Property
+        </Link>
       </section>
 
       <section className="dashboard-cards">

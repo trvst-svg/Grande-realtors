@@ -8,29 +8,39 @@ import HousesPage from "./houses.jsx";
 import BiddingPage from "./bidding.jsx";
 import ContactPage from "./contact.jsx";
 import ProfilePage from "./profile.jsx";
+import ListPropertyPage from "./list-property.jsx";
+import AdminBlocker from "./components/AdminBlocker.jsx";
 import AdminDashboard from "./admin-dashboard.jsx";
 import AdminUsers from "./admin-users.jsx";
 import AdminProperties from "./admin-properties.jsx";
 import AgentDashboard from "./agent-dashboard.jsx";
+import AgentProperties from "./agent-properties.jsx";
 import UserDashboard from "./user-dashboard.jsx";
 
 export default function App() {
+  const blockAdmin = (element) => <AdminBlocker>{element}</AdminBlocker>;
+
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/lands" element={<LandsPage />} />
-      <Route path="/houses" element={<HousesPage />} />
-      <Route path="/bidding" element={<BiddingPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/" element={blockAdmin(<LandingPage />)} />
+      <Route path="/home" element={blockAdmin(<HomePage />)} />
+      <Route path="/lands" element={blockAdmin(<LandsPage />)} />
+      <Route path="/houses" element={blockAdmin(<HousesPage />)} />
+      <Route path="/bidding" element={blockAdmin(<BiddingPage />)} />
+      <Route path="/contact" element={blockAdmin(<ContactPage />)} />
+      <Route path="/profile" element={blockAdmin(<ProfilePage />)} />
+      <Route path="/list-property" element={blockAdmin(<ListPropertyPage />)} />
       <Route path="/dashboard/admin" element={<AdminDashboard />} />
       <Route path="/dashboard/admin/users" element={<AdminUsers />} />
       <Route path="/dashboard/admin/properties" element={<AdminProperties />} />
-      <Route path="/dashboard/agent" element={<AgentDashboard />} />
-      <Route path="/dashboard/user" element={<UserDashboard />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/dashboard/agent" element={blockAdmin(<AgentDashboard />)} />
+      <Route
+        path="/dashboard/agent/properties"
+        element={blockAdmin(<AgentProperties />)}
+      />
+      <Route path="/dashboard/user" element={blockAdmin(<UserDashboard />)} />
+      <Route path="/signup" element={blockAdmin(<SignupPage />)} />
+      <Route path="/login" element={blockAdmin(<LoginPage />)} />
     </Routes>
   );
 }

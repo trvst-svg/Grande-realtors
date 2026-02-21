@@ -37,9 +37,6 @@ export default function AdminShell({ title, subtitle, children }) {
           <NavLink to="/dashboard/admin/properties" className={navClass}>
             Property Approvals
           </NavLink>
-          <NavLink to="/home" className={navClass}>
-            View Site
-          </NavLink>
         </nav>
         <div className="admin-actions">
           <button className="logout-btn" type="button" onClick={handleLogout}>

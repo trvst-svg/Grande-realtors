@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap");
+
+.list-property-page {
+  min-height: 100vh;
+  background: #f5efe7;
+  color: #1f1f1f;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.list-hero {
+  padding: 32px 70px 12px;
+}
+
+.list-hero h1 {
+  margin: 0 0 8px;
+  font-family: "Playfair Display", serif;
+}
+
+.list-hero p {
+  margin: 0;
+  color: #6d655b;
+}
+
+.list-form {
+  display: grid;
+  gap: 18px;
+  padding: 18px 70px 60px;
+}
+
+.form-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+  display: grid;
+  gap: 12px;
+}
+
+.form-card h2 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+}
+
+.form-card label {
+  font-size: 13px;
+  color: #5c534a;
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e1d6c7;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.form-card textarea {
+  resize: vertical;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.list-form button {
+  background: #1f4b43;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status {
+  margin: 0;
+  font-size: 13px;
+}
+
+.status.success {
+  color: #1f4b43;
+}
+
+.status.error {
+  color: #7a2e2e;
+}
+
+.muted {
+  color: #9a9084;
+  font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .list-hero,
+  .list-form {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

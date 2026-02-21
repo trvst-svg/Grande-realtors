@@ -163,6 +163,34 @@ export async function rejectPropertyRequest(requestId) {
   return data;
 }
 
+export async function createPropertyListing(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/properties`, {
+    method: "POST",
+    headers: withAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to submit property");
+  }
+  return data;
+}
+
+export async function uploadPropertyImages(propertyId, files) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}/images`, {
+    method: "POST",
+    headers: withAuthHeaders(),
+    body: formData,
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to upload images");
+  }
+  return data;
+}
+
 export async function fetchAgentDashboard(agentId) {
   const response = await fetch(
     `${API_BASE_URL}/api/dashboard/agent/${agentId}`,

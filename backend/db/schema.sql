@@ -44,6 +44,8 @@ CREATE TABLE properties (
   location TEXT NOT NULL,
   description TEXT,
   price NUMERIC NOT NULL,
+  listing_purpose VARCHAR(50) DEFAULT 'sale',
+  listing_type VARCHAR(50),
   sale_status VARCHAR(50) DEFAULT 'available',
   listed_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );

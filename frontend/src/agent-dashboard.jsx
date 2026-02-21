@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { fetchAgentDashboard } from "./api.js";
 import "./dashboard.css";
@@ -50,6 +51,9 @@ export default function AgentDashboard() {
       <section className="dashboard-hero">
         <h1>Sales Handler Dashboard</h1>
         <p>Assigned properties and inquiry activity.</p>
+        <Link className="dashboard-action" to="/dashboard/agent/properties">
+          Review Property Requests
+        </Link>
       </section>
 
       <section className="dashboard-cards">
