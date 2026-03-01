@@ -14,9 +14,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    setDashboardError("");
-    setRequestsError("");
 
     Promise.allSettled([
       fetchAdminDashboard(),

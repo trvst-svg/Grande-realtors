@@ -9,6 +9,7 @@ import BiddingPage from "./bidding.jsx";
 import ContactPage from "./contact.jsx";
 import ProfilePage from "./profile.jsx";
 import ListPropertyPage from "./list-property.jsx";
+import ListAuctionPage from "./list-auction.jsx";
 import AdminBlocker from "./components/AdminBlocker.jsx";
 import AdminDashboard from "./admin-dashboard.jsx";
 import AdminUsers from "./admin-users.jsx";
@@ -16,6 +17,7 @@ import AdminProperties from "./admin-properties.jsx";
 import AgentDashboard from "./agent-dashboard.jsx";
 import AgentProperties from "./agent-properties.jsx";
 import UserDashboard from "./user-dashboard.jsx";
+import AuctionBidPage from "./auction-bid.jsx";
 
 export default function App() {
   const blockAdmin = (element) => <AdminBlocker>{element}</AdminBlocker>;
@@ -27,9 +29,14 @@ export default function App() {
       <Route path="/lands" element={blockAdmin(<LandsPage />)} />
       <Route path="/houses" element={blockAdmin(<HousesPage />)} />
       <Route path="/bidding" element={blockAdmin(<BiddingPage />)} />
+      <Route path="/bidding/:id" element={blockAdmin(<AuctionBidPage />)} />
       <Route path="/contact" element={blockAdmin(<ContactPage />)} />
       <Route path="/profile" element={blockAdmin(<ProfilePage />)} />
       <Route path="/list-property" element={blockAdmin(<ListPropertyPage />)} />
+      <Route
+        path="/auctions/new/:propertyId"
+        element={blockAdmin(<ListAuctionPage />)}
+      />
       <Route path="/dashboard/admin" element={<AdminDashboard />} />
       <Route path="/dashboard/admin/users" element={<AdminUsers />} />
       <Route path="/dashboard/admin/properties" element={<AdminProperties />} />

@@ -110,9 +110,9 @@ export default function LoginPage() {
               Remember me
             </label>
 
-            <button className="link-button" type="button">
+            <Link className="link-button" to="/contact">
               Forgot Password?
-            </button>
+            </Link>
           </div>
 
           {status.message ? (

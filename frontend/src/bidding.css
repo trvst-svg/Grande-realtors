@@ -228,6 +228,120 @@
   font-size: 12px;
 }
 
+.bid-detail {
+  background: #1a1a1a;
+  color: #f7f1e8;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 24px;
+}
+
+.bid-media {
+  background: #e6d6b5;
+  border-radius: 12px;
+  min-height: 260px;
+  overflow: hidden;
+}
+
+.bid-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bid-info h2 {
+  margin: 0 0 10px;
+  font-family: "Playfair Display", serif;
+}
+
+.bid-info .muted {
+  color: #cfc6b7;
+  margin: 0;
+  font-size: 12px;
+}
+
+.bid-info h3 {
+  margin: 8px 0 16px;
+  color: #d1a33a;
+}
+
+.bid-meta {
+  background: #262626;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.bid-actions {
+  padding: 0 70px 60px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.bid-actions .panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.bid-actions .panel h2 {
+  margin-top: 0;
+  font-family: "Playfair Display", serif;
+}
+
+.bid-actions .muted {
+  color: #6d655b;
+  font-size: 13px;
+}
+
+.ticket-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0 18px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #f2ede5;
+}
+
+.bid-actions input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd4c5;
+  margin-bottom: 12px;
+}
+
+.bid-actions button {
+  border: none;
+  background: #111;
+  color: #f7f1e8;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.status {
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+.status.error {
+  color: #c0392b;
+}
+
+.status.success {
+  color: #1c7c42;
+}
+
 @media (max-width: 1100px) {
   .hero-card {
     grid-template-columns: 1fr;
@@ -235,6 +349,14 @@
 
   .auction-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bid-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .bid-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -247,6 +369,11 @@
 
   .bidding-hero,
   .active-auctions {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .bid-actions {
     padding-left: 24px;
     padding-right: 24px;
   }

@@ -71,6 +71,7 @@
   color: #c9a24d;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .browse-grid {

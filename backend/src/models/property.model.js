@@ -8,6 +8,7 @@ export { default as deleteProperty } from "./property/deleteProperty.js";
 export { default as getPropertyById } from "./property/getPropertyById.js";
 export { default as getPropertyImages } from "./property/getPropertyImages.js";
 export { default as getPropertyTypeIdByName } from "./property/getPropertyTypeIdByName.js";
+export { default as getPropertyWithVerification } from "./property/getPropertyWithVerification.js";
 export { default as listPendingPropertyVerificationRequests } from "./property/listPendingPropertyVerificationRequests.js";
 export { default as listProperties } from "./property/listProperties.js";
 export { default as listPropertiesByType } from "./property/listPropertiesByType.js";

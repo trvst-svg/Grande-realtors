@@ -60,6 +60,15 @@ export async function fetchProperties(type) {
   return data.items || [];
 }
 
+export async function fetchProperty(propertyId) {
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load property");
+  }
+  return data;
+}
+
 export async function fetchAuctions() {
   const response = await fetch(`${API_BASE_URL}/api/auctions`);
   const data = await response.json();
@@ -67,6 +76,64 @@ export async function fetchAuctions() {
     throw new Error(data.error || "Unable to load auctions");
   }
   return data.items || [];
+}
+
+export async function createAuctionListing(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/auctions`, {
+    method: "POST",
+    headers: withAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to create auction");
+  }
+  return data;
+}
+
+export async function fetchAuction(auctionId) {
+  const response = await fetch(`${API_BASE_URL}/api/auctions/${auctionId}`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load auction");
+  }
+  return data;
+}
+
+export async function initiateBidTicket(auctionId) {
+  const response = await fetch(`${API_BASE_URL}/api/auctions/${auctionId}/ticket`, {
+    method: "POST",
+    headers: withAuthHeaders(),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to initiate payment");
+  }
+  return data;
+}
+
+export async function fetchBidTicket(auctionId) {
+  const response = await fetch(`${API_BASE_URL}/api/auctions/${auctionId}/ticket`, {
+    headers: withAuthHeaders(),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load ticket status");
+  }
+  return data;
+}
+
+export async function placeBid(auctionId, bidAmount) {
+  const response = await fetch(`${API_BASE_URL}/api/auctions/${auctionId}/bids`, {
+    method: "POST",
+    headers: withAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ bid_amount: bidAmount }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to place bid");
+  }
+  return data;
 }
 
 export async function fetchLandingData() {

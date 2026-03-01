@@ -114,6 +114,12 @@
   font-size: 13px;
 }
 
+.contact-form .form-status {
+  margin: 0;
+  font-size: 13px;
+  color: #1c7c42;
+}
+
 .contact-form button {
   align-self: flex-start;
   padding: 10px 16px;

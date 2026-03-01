@@ -175,8 +175,8 @@ export default function SignupPage() {
               checked={form.agree}
               onChange={handleChange}
             />
-            I agree to the <span>terms and conditions</span> and{" "}
-            <span>Privacy Policy</span>
+            I agree to the <Link to="/contact">terms and conditions</Link> and{" "}
+            <Link to="/contact">Privacy Policy</Link>
           </label>
 
           {status.message ? (

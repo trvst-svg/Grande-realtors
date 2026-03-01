@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { fetchHomeData, fetchProperties } from "./api.js";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { API_BASE_URL, fetchHomeData, fetchProperties } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./home.css";
 
@@ -11,8 +12,6 @@ export default function HomePage() {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    setError("");
     Promise.allSettled([fetchHomeData(), fetchProperties()])
       .then(([homeResult, propertyResult]) => {
         if (!mounted) return;
@@ -39,6 +38,22 @@ export default function HomePage() {
       mounted = false;
     };
   }, []);
+
+  const featuredItems = useMemo(() => {
+    const items = properties.length ? properties.slice(0, 8) : data?.featured?.items || [];
+    return items.map((item) => {
+      const imageUrl = item.image ? `${API_BASE_URL}${item.image}` : null;
+      const title = item.title || item.property_type || "Property";
+      const location = item.location || "Nepal";
+      const priceValue = item.price;
+      const price =
+        typeof priceValue === "number" || /^\d+(\.\d+)?$/.test(String(priceValue || ""))
+          ? `NPR ${priceValue}`
+          : priceValue || "NPR -";
+      const meta = item.meta || item.description || "Verified listing";
+      return { ...item, imageUrl, title, location, price, meta };
+    });
+  }, [data, properties]);
 
   if (loading) {
     return (
@@ -82,18 +97,17 @@ export default function HomePage() {
       <section className="home-section">
         <div className="section-head row">
           <h2>{data.featured.title}</h2>
-          <button className="text-link">{data.featured.action}</button>
+          <Link className="text-link" to="/lands">
+            {data.featured.action}
+          </Link>
         </div>
         <div className="featured-grid">
-          {(properties.length
-            ? properties.slice(0, 8)
-            : data.featured.items
-          ).map((item) => (
+          {featuredItems.map((item) => (
             <article key={item.id} className="home-card">
               <div className="card-media">
                 <span className="badge">{item.badge || "Featured"}</span>
-                {item.image ? (
-                  <img src={item.image} alt={item.title} />
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.title} />
                 ) : (
                   <div className="media-block" />
                 )}

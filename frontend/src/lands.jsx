@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { fetchProperties } from "./api.js";
+import { API_BASE_URL, fetchProperties } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./properties.css";
 
 export default function LandsPage() {
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState({
+    location: "",
+    type: "All Types",
+    minPrice: "",
+    maxPrice: "",
+  });
+  const [draft, setDraft] = useState({
     location: "",
     type: "All Types",
     minPrice: "",
@@ -20,11 +26,29 @@ export default function LandsPage() {
     const matchLocation = filter.location
       ? item.location?.toLowerCase().includes(filter.location.toLowerCase())
       : true;
+    const matchType =
+      filter.type === "All Types"
+        ? true
+        : (item.listing_type || "").toLowerCase() ===
+          filter.type.toLowerCase();
     const price = Number(item.price || 0);
     const matchMin = filter.minPrice ? price >= Number(filter.minPrice) : true;
     const matchMax = filter.maxPrice ? price <= Number(filter.maxPrice) : true;
-    return matchLocation && matchMin && matchMax;
+    return matchLocation && matchType && matchMin && matchMax;
   });
+
+  const handleApply = () => setFilter({ ...draft });
+
+  const handleReset = () => {
+    const reset = {
+      location: "",
+      type: "All Types",
+      minPrice: "",
+      maxPrice: "",
+    };
+    setDraft(reset);
+    setFilter(reset);
+  };
 
   return (
     <div className="property-page">
@@ -43,9 +67,9 @@ export default function LandsPage() {
             <input
               id="location"
               placeholder="e.g. Lalitpur"
-              value={filter.location}
+              value={draft.location}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, location: e.target.value }))
+                setDraft((prev) => ({ ...prev, location: e.target.value }))
               }
             />
           </div>
@@ -53,15 +77,15 @@ export default function LandsPage() {
             <label htmlFor="type">Land Type</label>
             <select
               id="type"
-              value={filter.type}
+              value={draft.type}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, type: e.target.value }))
+                setDraft((prev) => ({ ...prev, type: e.target.value }))
               }
             >
               <option>All Types</option>
               <option>Residential</option>
               <option>Commercial</option>
-              <option>Agricultural</option>
+              <option>Semi-commercial</option>
             </select>
           </div>
           <div>
@@ -69,9 +93,9 @@ export default function LandsPage() {
             <input
               id="min"
               placeholder="e.g. 5000000"
-              value={filter.minPrice}
+              value={draft.minPrice}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, minPrice: e.target.value }))
+                setDraft((prev) => ({ ...prev, minPrice: e.target.value }))
               }
             />
           </div>
@@ -80,27 +104,20 @@ export default function LandsPage() {
             <input
               id="max"
               placeholder="e.g. 20000000"
-              value={filter.maxPrice}
+              value={draft.maxPrice}
               onChange={(e) =>
-                setFilter((prev) => ({ ...prev, maxPrice: e.target.value }))
+                setDraft((prev) => ({ ...prev, maxPrice: e.target.value }))
               }
             />
           </div>
           <div className="filter-actions">
-            <button className="apply" type="button">
+            <button className="apply" type="button" onClick={handleApply}>
               Apply Filters
             </button>
             <button
               className="reset"
               type="button"
-              onClick={() =>
-                setFilter({
-                  location: "",
-                  type: "All Types",
-                  minPrice: "",
-                  maxPrice: "",
-                })
-              }
+              onClick={handleReset}
             >
               Reset
             </button>
@@ -115,10 +132,15 @@ export default function LandsPage() {
             <article key={item.id} className="property-card">
               <div className="property-media">
                 <span className="property-tag">{item.sale_status || "Available"}</span>
-                {item.image ? <img src={item.image} alt={item.title} /> : null}
+                {item.image ? (
+                  <img
+                    src={`${API_BASE_URL}${item.image}`}
+                    alt={item.title || item.property_type}
+                  />
+                ) : null}
               </div>
               <div className="property-body">
-                <p className="price">{item.price}</p>
+                <p className="price">NPR {item.price}</p>
                 <h4>{item.title || item.property_type}</h4>
                 <p className="location">{item.location}</p>
                 <div className="meta">{item.description || "Land listing"}</div>

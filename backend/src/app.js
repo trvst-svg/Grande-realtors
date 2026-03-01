@@ -9,6 +9,7 @@ import auctionRoutes from "./routes/auction.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/auctions", auctionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;

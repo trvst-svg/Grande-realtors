@@ -8,6 +8,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const handleSupport = () => navigate("/contact");
 
   useEffect(() => {
     const token = localStorage.getItem("gr_token");
@@ -71,14 +72,18 @@ export default function ProfilePage() {
               <span>Active Bids</span>
             </div>
           </div>
-          <button>Edit Profile</button>
+          <button type="button" onClick={handleSupport}>
+            Edit Profile
+          </button>
         </section>
 
         <section className="profile-info">
           <div className="info-card">
             <div className="info-header">
               <h3>Personal Information</h3>
-              <button className="link">Edit</button>
+              <button className="link" type="button" onClick={handleSupport}>
+                Edit
+              </button>
             </div>
             <div className="info-grid">
               <div>
@@ -103,7 +108,13 @@ export default function ProfilePage() {
           <div className="info-card">
             <div className="info-header">
               <h3>My Properties</h3>
-              <button className="link">View All →</button>
+              <button
+                className="link"
+                type="button"
+                onClick={() => navigate("/dashboard/user")}
+              >
+                View All →
+              </button>
             </div>
             <div className="property-mini-grid">
               {data.myProperties.length ? (
@@ -126,21 +137,27 @@ export default function ProfilePage() {
           <div className="info-card">
             <div className="info-header">
               <h3>Security & Privacy</h3>
-              <button className="link">Edit</button>
+              <button className="link" type="button" onClick={handleSupport}>
+                Edit
+              </button>
             </div>
             <div className="security-item">
               <div>
                 <strong>Change Password</strong>
                 <p>Update your password regularly to keep your account secure.</p>
               </div>
-              <button>Change</button>
+              <button type="button" onClick={handleSupport}>
+                Change
+              </button>
             </div>
             <div className="security-item">
               <div>
                 <strong>Privacy Settings</strong>
                 <p>Control who can see your profile and properties.</p>
               </div>
-              <button>Manage</button>
+              <button type="button" onClick={handleSupport}>
+                Manage
+              </button>
             </div>
           </div>
         </section>

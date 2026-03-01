@@ -129,7 +129,9 @@ export default function LandingPage() {
             <br /> in Nepal
           </h1>
           <p>{data.hero.copy}</p>
-          <button>{data.hero.cta}</button>
+          <Link className="hero-cta" to="/home">
+            {data.hero.cta}
+          </Link>
         </div>
         <div className="hero-card">
           <div className="hero-house">
@@ -181,7 +183,9 @@ export default function LandingPage() {
       <section className="cta-band">
         <h2>{data.cta.title}</h2>
         <p>{data.cta.copy}</p>
-        <button>{data.cta.button}</button>
+        <Link className="cta-button" to="/signup">
+          {data.cta.button}
+        </Link>
       </section>
 
       <footer className="landing-footer">
@@ -191,19 +195,44 @@ export default function LandingPage() {
         </div>
         <div>
           <h4>Quick Links</h4>
-          {data.footer.quickLinks.map((item) => (
-            <a key={item} href="#">
-              {item}
-            </a>
-          ))}
+          {data.footer.quickLinks.map((item) => {
+            const label = item.toLowerCase();
+            const routeMap = {
+              home: "/home",
+              about: "/contact",
+              services: "/contact",
+              blog: "/contact",
+              contact: "/contact",
+            };
+            const route = routeMap[label];
+            return route ? (
+              <Link key={item} to={route}>
+                {item}
+              </Link>
+            ) : (
+              <span key={item}>{item}</span>
+            );
+          })}
         </div>
         <div>
           <h4>Categories</h4>
-          {data.footer.categories.map((item) => (
-            <a key={item} href="#">
-              {item}
-            </a>
-          ))}
+          {data.footer.categories.map((item) => {
+            const label = item.toLowerCase();
+            const routeMap = {
+              houses: "/houses",
+              apartments: "/houses",
+              lands: "/lands",
+              auctions: "/bidding",
+            };
+            const route = routeMap[label];
+            return route ? (
+              <Link key={item} to={route}>
+                {item}
+              </Link>
+            ) : (
+              <span key={item}>{item}</span>
+            );
+          })}
         </div>
         <div>
           <h4>Contact</h4>
