@@ -183,7 +183,7 @@ export default function ListPropertyPage() {
                 onChange={handleChange}
               >
                 <option value="sale">Sale</option>
-                <option value="rent">Rent</option>
+                <option value="bidding">Bidding</option>
               </select>
             </div>
             <div>

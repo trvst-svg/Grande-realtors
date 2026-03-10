@@ -7,6 +7,7 @@ const navItems = [
   { label: "Houses", to: "/houses" },
   { label: "Bidding", to: "/bidding" },
   { label: "Contact", to: "/contact" },
+  { label: "EMI Calculator", to: "/emi" },
 ];
 
 export default function Navbar({

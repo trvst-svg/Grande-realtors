@@ -1,0 +1,140 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap");
+
+.emi-page {
+  min-height: 100vh;
+  background: #f2ede5;
+  color: #1f1f1f;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.emi-hero {
+  padding: 32px 70px 10px;
+}
+
+.emi-hero h1 {
+  font-family: "Playfair Display", serif;
+  margin: 12px 0 6px;
+  font-size: 32px;
+}
+
+.emi-hero p {
+  margin: 0;
+  color: #6d655b;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: #c9a24d;
+  background: #1c1c1c;
+  padding: 6px 10px;
+  border-radius: 12px;
+}
+
+.emi-grid {
+  padding: 20px 70px 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 24px;
+}
+
+.emi-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
+}
+
+.emi-card.highlight {
+  background: #1b1b1b;
+  color: #f7f1e8;
+}
+
+.emi-card h2 {
+  margin: 0 0 14px;
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+}
+
+.emi-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emi-form label {
+  font-size: 12px;
+  color: #6d655b;
+}
+
+.emi-form input,
+.emi-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2ddd5;
+  background: #f7f2ea;
+  font-size: 13px;
+}
+
+.tenure-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 10px;
+}
+
+.emi-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.result-row strong {
+  font-size: 16px;
+  color: #c9a24d;
+}
+
+.result-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #cfc6b7;
+}
+
+.result-placeholder {
+  margin: 0;
+  font-size: 13px;
+  color: #cfc6b7;
+}
+
+@media (max-width: 1024px) {
+  .emi-hero,
+  .emi-grid {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .emi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .emi-hero,
+  .emi-grid {
+    padding: 24px;
+  }
+
+  .tenure-row {
+    grid-template-columns: 1fr;
+  }
+}

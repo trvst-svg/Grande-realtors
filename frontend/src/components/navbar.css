@@ -65,6 +65,17 @@
   justify-content: center;
 }
 
+.header-actions .ghost,
+.header-actions .cta,
+.list-btn,
+.logout-btn {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .header-actions .ghost {
   border: 1px solid #c9a24d;
   padding: 8px 16px;
@@ -101,8 +112,6 @@
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 13px;
-  min-height: 34px;
-  line-height: 1;
   font-family: inherit;
   cursor: pointer;
 }

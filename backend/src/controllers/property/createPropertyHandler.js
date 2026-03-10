@@ -38,7 +38,7 @@ export default async function createPropertyHandler(req, res, next) {
       return res.status(400).json({ error: "Invalid property type" });
     }
 
-    const allowedPurposes = ["sale", "rent"];
+    const allowedPurposes = ["sale", "bidding"];
     if (listing_purpose && !allowedPurposes.includes(listing_purpose)) {
       return res.status(400).json({ error: "Invalid listing purpose" });
     }
