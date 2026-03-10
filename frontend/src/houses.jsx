@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { API_BASE_URL, fetchProperties } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./properties.css";
@@ -129,23 +130,33 @@ export default function HousesPage() {
         <h3>Showing {filtered.length} house properties</h3>
         <div className="property-grid">
           {filtered.map((item) => (
-            <article key={item.id} className="property-card">
-              <div className="property-media">
-                <span className="property-tag">{item.sale_status || "Available"}</span>
-                {item.image ? (
-                  <img
-                    src={`${API_BASE_URL}${item.image}`}
-                    alt={item.title || item.property_type}
-                  />
-                ) : null}
-              </div>
-              <div className="property-body">
-                <p className="price">NPR {item.price}</p>
-                <h4>{item.title || item.property_type}</h4>
-                <p className="location">{item.location}</p>
-                <div className="meta">{item.description || "House listing"}</div>
-              </div>
-            </article>
+            <Link
+              key={item.id}
+              className="property-card-link"
+              to={`/properties/${item.id}`}
+            >
+              <article className="property-card">
+                <div className="property-media">
+                  <span className="property-tag">
+                    {item.sale_status || "Available"}
+                  </span>
+                  {item.image ? (
+                    <img
+                      src={`${API_BASE_URL}${item.image}`}
+                      alt={item.title || item.property_type}
+                    />
+                  ) : null}
+                </div>
+                <div className="property-body">
+                  <p className="price">NPR {item.price}</p>
+                  <h4>{item.title || item.property_type}</h4>
+                  <p className="location">{item.location}</p>
+                  <div className="meta">
+                    {item.description || "House listing"}
+                  </div>
+                </div>
+              </article>
+            </Link>
           ))}
         </div>
       </section>

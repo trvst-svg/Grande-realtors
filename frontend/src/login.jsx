@@ -110,7 +110,7 @@ export default function LoginPage() {
               Remember me
             </label>
 
-            <Link className="link-button" to="/contact">
+            <Link className="link-button" to="/forgot-password">
               Forgot Password?
             </Link>
           </div>

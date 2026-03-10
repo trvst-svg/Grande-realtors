@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import "./navbar.css";
 
 const navItems = [
@@ -31,9 +31,13 @@ export default function Navbar({
       </Link>
       <nav>
         {navItems.map((item) => (
-          <Link key={item.label} to={item.to}>
+          <NavLink
+            key={item.label}
+            to={item.to}
+            className={({ isActive }) => (isActive ? "active" : undefined)}
+          >
             {item.label}
-          </Link>
+          </NavLink>
         ))}
       </nav>
       <div className="header-actions">

@@ -8,3 +8,4 @@ export { default as getUserById } from "./user/getUserById.js";
 export { default as getUserProfile } from "./user/getUserProfile.js";
 export { default as listPendingUsers } from "./user/listPendingUsers.js";
 export { default as rejectUser } from "./user/rejectUser.js";
+export { default as updateUserPassword } from "./user/updateUserPassword.js";

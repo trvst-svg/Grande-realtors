@@ -27,12 +27,42 @@
   color: #cfc6b7;
   text-decoration: none;
   font-size: 14px;
+  position: relative;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+}
+
+.site-header nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: #c9a24d;
+  transition: width 0.2s ease;
+}
+
+.site-header nav a:hover,
+.site-header nav a.active {
+  color: #f7f1e8;
+}
+
+.site-header nav a:hover::after,
+.site-header nav a.active::after {
+  width: 100%;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.header-actions > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-actions .ghost {
@@ -71,6 +101,9 @@
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 13px;
+  min-height: 34px;
+  line-height: 1;
+  font-family: inherit;
   cursor: pointer;
 }
 

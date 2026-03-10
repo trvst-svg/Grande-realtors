@@ -136,11 +136,29 @@
   gap: 18px;
 }
 
+.property-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+}
+
+.property-card-link:focus-visible .property-card {
+  outline: 2px solid #c9a24d;
+  outline-offset: 3px;
+}
+
 .property-card {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.property-card-link:hover .property-card {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
 }
 
 .property-media {

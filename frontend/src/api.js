@@ -26,6 +26,32 @@ export async function loginUser(payload) {
   return data;
 }
 
+export async function requestPasswordReset(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/auth/password/forgot`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to request password reset");
+  }
+  return data;
+}
+
+export async function resetPassword(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/auth/password/reset`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to reset password");
+  }
+  return data;
+}
+
 export async function signupUser(formData) {
   const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
     method: "POST",
@@ -65,6 +91,19 @@ export async function fetchProperty(propertyId) {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load property");
+  }
+  return data;
+}
+
+export async function sendPropertyInquiry(propertyId, payload) {
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}/inquiry`, {
+    method: "POST",
+    headers: withAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to send inquiry");
   }
   return data;
 }

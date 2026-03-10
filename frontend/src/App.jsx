@@ -18,6 +18,9 @@ import AgentDashboard from "./agent-dashboard.jsx";
 import AgentProperties from "./agent-properties.jsx";
 import UserDashboard from "./user-dashboard.jsx";
 import AuctionBidPage from "./auction-bid.jsx";
+import ForgotPasswordPage from "./forgot-password.jsx";
+import ResetPasswordPage from "./reset-password.jsx";
+import PropertyDetailsPage from "./property-details.jsx";
 
 export default function App() {
   const blockAdmin = (element) => <AdminBlocker>{element}</AdminBlocker>;
@@ -30,6 +33,7 @@ export default function App() {
       <Route path="/houses" element={blockAdmin(<HousesPage />)} />
       <Route path="/bidding" element={blockAdmin(<BiddingPage />)} />
       <Route path="/bidding/:id" element={blockAdmin(<AuctionBidPage />)} />
+      <Route path="/properties/:id" element={blockAdmin(<PropertyDetailsPage />)} />
       <Route path="/contact" element={blockAdmin(<ContactPage />)} />
       <Route path="/profile" element={blockAdmin(<ProfilePage />)} />
       <Route path="/list-property" element={blockAdmin(<ListPropertyPage />)} />
@@ -48,6 +52,8 @@ export default function App() {
       <Route path="/dashboard/user" element={blockAdmin(<UserDashboard />)} />
       <Route path="/signup" element={blockAdmin(<SignupPage />)} />
       <Route path="/login" element={blockAdmin(<LoginPage />)} />
+      <Route path="/forgot-password" element={blockAdmin(<ForgotPasswordPage />)} />
+      <Route path="/reset-password" element={blockAdmin(<ResetPasswordPage />)} />
     </Routes>
   );
 }

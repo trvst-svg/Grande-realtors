@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createPropertyHandler,
+  createPropertyInquiryHandler,
   addPropertyImagesHandler,
   deletePropertyHandler,
   getPropertyHandler,
@@ -19,6 +20,7 @@ router.get("/search", searchPropertiesHandler);
 router.get("/type/:type", listPropertiesByTypeHandler);
 router.post("/", requireAuth, createPropertyHandler);
 router.get("/:id", getPropertyHandler);
+router.post("/:id/inquiry", requireAuth, createPropertyInquiryHandler);
 router.post(
   "/:id/images",
   requireAuth,
