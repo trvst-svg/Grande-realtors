@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { API_BASE_URL, fetchProperty, sendPropertyInquiry } from "./api.js";
+import {
+  API_BASE_URL,
+  fetchProperty,
+  fetchPropertyBookmarkStatus,
+  fetchUserProfile,
+  addPropertyBookmark,
+  removePropertyBookmark,
+  sendPropertyInquiry,
+} from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./property-details.css";
 
@@ -22,6 +30,7 @@ export default function PropertyDetailsPage() {
   const [property, setProperty] = useState(null);
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [inquiry, setInquiry] = useState({
     name: "",
@@ -31,6 +40,11 @@ export default function PropertyDetailsPage() {
   });
   const [sending, setSending] = useState(false);
   const [inquiryStatus, setInquiryStatus] = useState({ type: "", message: "" });
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarking, setBookmarking] = useState(false);
+  const [bookmarkStatus, setBookmarkStatus] = useState({ type: "", message: "" });
+  const hasToken =
+    typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
 
   useEffect(() => {
     let mounted = true;
@@ -58,13 +72,52 @@ export default function PropertyDetailsPage() {
       setActiveImageIndex(0);
       setInquiryStatus({ type: "", message: "" });
       setInquiry({
-        name: "",
-        email: "",
-        phone: "",
+        name: currentUser
+          ? `${currentUser.firstname || ""} ${currentUser.lastname || ""}`.trim()
+          : "",
+        email: currentUser?.email || "",
+        phone: currentUser?.number || "",
         message: "",
       });
     }
-  }, [property?.id]);
+  }, [property?.id, currentUser]);
+
+  useEffect(() => {
+    if (!hasToken) {
+      setCurrentUser(null);
+      return;
+    }
+    let stored = {};
+    try {
+      stored = JSON.parse(localStorage.getItem("gr_user") || "{}");
+    } catch {
+      stored = {};
+    }
+    if (!stored.id) return;
+    fetchUserProfile(stored.id)
+      .then((data) => {
+        setCurrentUser(data.user);
+        setInquiry((prev) => ({
+          name:
+            prev.name ||
+            `${data.user.firstname || ""} ${data.user.lastname || ""}`.trim(),
+          email: prev.email || data.user.email || "",
+          phone: prev.phone || data.user.number || "",
+          message: prev.message || "",
+        }));
+      })
+      .catch(() => {});
+  }, [hasToken]);
+
+  useEffect(() => {
+    if (!property?.id || !hasToken) {
+      setIsBookmarked(false);
+      return;
+    }
+    fetchPropertyBookmarkStatus(property.id)
+      .then((data) => setIsBookmarked(Boolean(data.isBookmarked)))
+      .catch(() => {});
+  }, [property?.id, hasToken]);
 
   if (loading) {
     return (
@@ -105,8 +158,9 @@ export default function PropertyDetailsPage() {
   const salesHandlerName = salesHandler
     ? `${salesHandler.firstname || ""} ${salesHandler.lastname || ""}`.trim()
     : "";
-  const hasToken =
-    typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
+  const isOwner = Boolean(
+    hasToken && currentUser?.id && property.owner_id === currentUser.id
+  );
 
   const houseDetails = property.details;
   const landDetails = property.details;
@@ -205,6 +259,51 @@ export default function PropertyDetailsPage() {
             </strong>
           </div>
 
+          <div className="bookmark-row">
+            <button
+              type="button"
+              className={`bookmark-btn${isBookmarked ? " active" : ""}`}
+              disabled={!hasToken || isOwner || bookmarking}
+              onClick={async () => {
+                if (!property?.id) return;
+                setBookmarkStatus({ type: "", message: "" });
+                setBookmarking(true);
+                try {
+                  if (isBookmarked) {
+                    await removePropertyBookmark(property.id);
+                    setIsBookmarked(false);
+                  } else {
+                    await addPropertyBookmark(property.id);
+                    setIsBookmarked(true);
+                  }
+                } catch (err) {
+                  setBookmarkStatus({ type: "error", message: err.message });
+                } finally {
+                  setBookmarking(false);
+                }
+              }}
+            >
+              {isBookmarked ? "Bookmarked" : "Bookmark"}
+            </button>
+            {!hasToken ? (
+              <span className="bookmark-note">Sign in to bookmark.</span>
+            ) : null}
+            {isOwner ? (
+              <span className="bookmark-note">Owners cannot bookmark.</span>
+            ) : null}
+          </div>
+          {bookmarkStatus.message ? (
+            <p className={`status ${bookmarkStatus.type}`}>
+              {bookmarkStatus.message}
+            </p>
+          ) : null}
+
+          {isOwner ? (
+            <Link className="text-link" to={`/properties/${property.id}/edit`}>
+              Edit this property →
+            </Link>
+          ) : null}
+
           <div className="meta-grid">
             <div>
               <span className="label">Listing Type</span>
@@ -231,6 +330,138 @@ export default function PropertyDetailsPage() {
           <div className="details-description">
             <h3>Description</h3>
             <p>{property.description || "No description provided."}</p>
+          </div>
+
+          <div className="details-contact-inline">
+            <div>
+              <h3>Contact Sales Handler</h3>
+              {salesHandler ? (
+                <div className="handler-info">
+                  <p className="handler-name">
+                    {salesHandlerName || "Sales Handler"}
+                  </p>
+                  <p>{salesHandler.email || "Email not available"}</p>
+                  <p>{salesHandler.number || "Phone not available"}</p>
+                  <Link className="text-link" to={`/sales-handlers/${salesHandler.id}`}>
+                    View profile →
+                  </Link>
+                </div>
+              ) : (
+                <p className="handler-empty">No sales handler assigned.</p>
+              )}
+              {!hasToken ? (
+                <p className="handler-empty">Sign in to send an inquiry.</p>
+              ) : null}
+              {isOwner ? (
+                <p className="handler-empty">
+                  This is your property. Manage it from your profile.
+                </p>
+              ) : null}
+            </div>
+
+            <div className="contact-form">
+              <h4>Send an inquiry</h4>
+              <p className="muted">
+                We will automatically include the property details in your message.
+              </p>
+              {!hasToken ? (
+                <p className="status error">
+                  Please sign in to contact the sales handler.
+                </p>
+              ) : null}
+              {isOwner ? (
+                <p className="status error">
+                  Owners cannot contact their own property.
+                </p>
+              ) : null}
+              <form
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setInquiryStatus({ type: "", message: "" });
+                  setSending(true);
+                  try {
+                    const data = await sendPropertyInquiry(property.id, inquiry);
+                    setInquiryStatus({
+                      type: "success",
+                      message: data.message || "Inquiry sent.",
+                    });
+                    setInquiry({
+                      name: "",
+                      email: "",
+                      phone: "",
+                      message: "",
+                    });
+                  } catch (err) {
+                    setInquiryStatus({ type: "error", message: err.message });
+                  } finally {
+                    setSending(false);
+                  }
+                }}
+              >
+                <label htmlFor="inquiry-name">Full Name</label>
+                <input
+                  id="inquiry-name"
+                  type="text"
+                  value={inquiry.name}
+                  onChange={(event) =>
+                    setInquiry((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                  required
+                  disabled={!salesHandler || !hasToken || isOwner}
+                  readOnly={Boolean(currentUser)}
+                />
+
+                <label htmlFor="inquiry-email">Email</label>
+                <input
+                  id="inquiry-email"
+                  type="email"
+                  value={inquiry.email}
+                  onChange={(event) =>
+                    setInquiry((prev) => ({ ...prev, email: event.target.value }))
+                  }
+                  required
+                  disabled={!salesHandler || !hasToken || isOwner}
+                  readOnly={Boolean(currentUser)}
+                />
+
+                <label htmlFor="inquiry-phone">Phone (optional)</label>
+                <input
+                  id="inquiry-phone"
+                  type="text"
+                  value={inquiry.phone}
+                  onChange={(event) =>
+                    setInquiry((prev) => ({ ...prev, phone: event.target.value }))
+                  }
+                  disabled={!salesHandler || !hasToken || isOwner}
+                />
+
+                <label htmlFor="inquiry-message">Message</label>
+                <textarea
+                  id="inquiry-message"
+                  rows="4"
+                  value={inquiry.message}
+                  onChange={(event) =>
+                    setInquiry((prev) => ({ ...prev, message: event.target.value }))
+                  }
+                  required
+                  disabled={!salesHandler || !hasToken || isOwner}
+                  placeholder="Tell us what you are looking for."
+                />
+
+                {inquiryStatus.message ? (
+                  <p className={`status ${inquiryStatus.type}`}>
+                    {inquiryStatus.message}
+                  </p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={!salesHandler || !hasToken || isOwner || sending}
+                >
+                  {sending ? "Sending..." : "Send Inquiry"}
+                </button>
+              </form>
+            </div>
           </div>
 
         </aside>
@@ -328,114 +559,6 @@ export default function PropertyDetailsPage() {
           </div>
         </section>
       ) : null}
-
-      <section className="details-contact">
-        <div className="contact-card">
-          <h2>Contact Sales Handler</h2>
-          {salesHandler ? (
-            <div className="handler-info">
-              <p className="handler-name">{salesHandlerName || "Sales Handler"}</p>
-              <p>{salesHandler.email || "Email not available"}</p>
-              <p>{salesHandler.number || "Phone not available"}</p>
-            </div>
-          ) : (
-            <p className="handler-empty">No sales handler assigned.</p>
-          )}
-          {!hasToken ? (
-            <p className="handler-empty">Sign in to send an inquiry.</p>
-          ) : null}
-        </div>
-
-        <div className="contact-form">
-          <h3>Send an inquiry</h3>
-          <p className="muted">
-            We will automatically include the property details in your message.
-          </p>
-          {!hasToken ? (
-            <p className="status error">Please sign in to contact the sales handler.</p>
-          ) : null}
-          <form
-            onSubmit={async (event) => {
-              event.preventDefault();
-              setInquiryStatus({ type: "", message: "" });
-              setSending(true);
-              try {
-                const data = await sendPropertyInquiry(property.id, inquiry);
-                setInquiryStatus({
-                  type: "success",
-                  message: data.message || "Inquiry sent.",
-                });
-                setInquiry({
-                  name: "",
-                  email: "",
-                  phone: "",
-                  message: "",
-                });
-              } catch (err) {
-                setInquiryStatus({ type: "error", message: err.message });
-              } finally {
-                setSending(false);
-              }
-            }}
-          >
-            <label htmlFor="inquiry-name">Full Name</label>
-            <input
-              id="inquiry-name"
-              type="text"
-              value={inquiry.name}
-              onChange={(event) =>
-                setInquiry((prev) => ({ ...prev, name: event.target.value }))
-              }
-              required
-              disabled={!salesHandler || !hasToken}
-            />
-
-            <label htmlFor="inquiry-email">Email</label>
-            <input
-              id="inquiry-email"
-              type="email"
-              value={inquiry.email}
-              onChange={(event) =>
-                setInquiry((prev) => ({ ...prev, email: event.target.value }))
-              }
-              required
-              disabled={!salesHandler || !hasToken}
-            />
-
-            <label htmlFor="inquiry-phone">Phone (optional)</label>
-            <input
-              id="inquiry-phone"
-              type="text"
-              value={inquiry.phone}
-              onChange={(event) =>
-                setInquiry((prev) => ({ ...prev, phone: event.target.value }))
-              }
-              disabled={!salesHandler || !hasToken}
-            />
-
-            <label htmlFor="inquiry-message">Message</label>
-            <textarea
-              id="inquiry-message"
-              rows="4"
-              value={inquiry.message}
-              onChange={(event) =>
-                setInquiry((prev) => ({ ...prev, message: event.target.value }))
-              }
-              required
-              disabled={!salesHandler || !hasToken}
-              placeholder="Tell us what you are looking for."
-            />
-
-            {inquiryStatus.message ? (
-              <p className={`status ${inquiryStatus.type}`}>{inquiryStatus.message}</p>
-            ) : null}
-
-            <button type="submit" disabled={!salesHandler || !hasToken || sending}>
-              {sending ? "Sending..." : "Send Inquiry"}
-            </button>
-          </form>
-        </div>
-      </section>
 
       <footer className="details-footer">
         <div>

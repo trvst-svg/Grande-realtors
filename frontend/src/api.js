@@ -108,6 +108,41 @@ export async function sendPropertyInquiry(propertyId, payload) {
   return data;
 }
 
+export async function fetchPropertyBookmarkStatus(propertyId) {
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}/favorite`, {
+    headers: withAuthHeaders(),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load bookmark status");
+  }
+  return data;
+}
+
+export async function addPropertyBookmark(propertyId) {
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}/favorite`, {
+    method: "POST",
+    headers: withAuthHeaders(),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to bookmark property");
+  }
+  return data;
+}
+
+export async function removePropertyBookmark(propertyId) {
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}/favorite`, {
+    method: "DELETE",
+    headers: withAuthHeaders(),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to remove bookmark");
+  }
+  return data;
+}
+
 export async function fetchAuctions() {
   const response = await fetch(`${API_BASE_URL}/api/auctions`);
   const data = await response.json();
@@ -282,6 +317,19 @@ export async function createPropertyListing(payload) {
   return data;
 }
 
+export async function updateProperty(propertyId, payload) {
+  const response = await fetch(`${API_BASE_URL}/api/properties/${propertyId}`, {
+    method: "PUT",
+    headers: withAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to update property");
+  }
+  return data;
+}
+
 export async function uploadPropertyImages(propertyId, files) {
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));
@@ -327,6 +375,24 @@ export async function fetchUserProfile(userId) {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load profile");
+  }
+  return data;
+}
+
+export async function fetchSalesHandlers() {
+  const response = await fetch(`${API_BASE_URL}/api/agents`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load sales handlers");
+  }
+  return data.items || [];
+}
+
+export async function fetchSalesHandlerProfile(agentId) {
+  const response = await fetch(`${API_BASE_URL}/api/agents/${agentId}`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load sales handler");
   }
   return data;
 }

@@ -10,6 +10,7 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import agentRoutes from "./routes/agent.routes.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/properties", propertyRoutes);
 app.use("/api/auctions", auctionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/agents", agentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentRoutes);
 

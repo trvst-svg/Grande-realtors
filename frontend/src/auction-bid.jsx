@@ -38,6 +38,11 @@ export default function AuctionBidPage() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const storedUser =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("gr_user") || "{}")
+      : {};
+  const currentUserId = storedUser?.id;
 
   useEffect(() => {
     const token = localStorage.getItem("gr_token");
@@ -85,6 +90,13 @@ export default function AuctionBidPage() {
 
   const handlePayTicket = async () => {
     setStatus({ type: "", message: "" });
+    if (auction?.owner_id && auction.owner_id === currentUserId) {
+      setStatus({
+        type: "error",
+        message: "You cannot bid on your own property.",
+      });
+      return;
+    }
     setPaying(true);
     try {
       const data = await initiateBidTicket(id);
@@ -105,6 +117,14 @@ export default function AuctionBidPage() {
   const handleSubmitBid = async (event) => {
     event.preventDefault();
     setStatus({ type: "", message: "" });
+
+    if (auction?.owner_id && auction.owner_id === currentUserId) {
+      setStatus({
+        type: "error",
+        message: "You cannot bid on your own property.",
+      });
+      return;
+    }
 
     if (ticket.status !== "paid") {
       setStatus({ type: "error", message: "Pay the ticket fee to bid." });
@@ -151,6 +171,7 @@ export default function AuctionBidPage() {
   }
 
   const imageUrl = auction.image ? `${API_BASE_URL}${auction.image}` : "";
+  const isOwner = auction?.owner_id && auction.owner_id === currentUserId;
   const ticketLabel =
     ticket.status === "paid"
       ? "Paid"
@@ -186,6 +207,11 @@ export default function AuctionBidPage() {
               <span>Ticket Fee</span>
               <strong>NPR 1000</strong>
             </div>
+            {isOwner ? (
+              <p className="status error">
+                You cannot bid on your own property.
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -203,12 +229,14 @@ export default function AuctionBidPage() {
           <button
             type="button"
             onClick={handlePayTicket}
-            disabled={paying || ticket.status === "paid"}
+            disabled={paying || ticket.status === "paid" || isOwner}
           >
             {ticket.status === "paid"
               ? "Ticket Paid"
               : paying
               ? "Redirecting..."
+              : isOwner
+              ? "Owner Access"
               : "Pay Ticket Fee"}
           </button>
         </div>
@@ -232,10 +260,12 @@ export default function AuctionBidPage() {
             ) : null}
             <button
               type="submit"
-              disabled={submitting || ticket.status !== "paid"}
+              disabled={submitting || ticket.status !== "paid" || isOwner}
             >
               {submitting
                 ? "Placing Bid..."
+                : isOwner
+                ? "Owner Access"
                 : ticket.status !== "paid"
                 ? "Pay Ticket to Bid"
                 : "Submit Bid"}

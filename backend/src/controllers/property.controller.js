@@ -1,6 +1,9 @@
 export { default as addPropertyImagesHandler } from "./property/addPropertyImagesHandler.js";
 export { default as createPropertyHandler } from "./property/createPropertyHandler.js";
 export { default as createPropertyInquiryHandler } from "./property/createPropertyInquiryHandler.js";
+export { default as addFavoriteHandler } from "./property/addFavoriteHandler.js";
+export { default as removeFavoriteHandler } from "./property/removeFavoriteHandler.js";
+export { default as getFavoriteStatusHandler } from "./property/getFavoriteStatusHandler.js";
 export { default as deletePropertyHandler } from "./property/deletePropertyHandler.js";
 export { default as getPropertyHandler } from "./property/getPropertyHandler.js";
 export { default as listPropertiesByTypeHandler } from "./property/listPropertiesByTypeHandler.js";

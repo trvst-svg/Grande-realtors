@@ -4,6 +4,8 @@ import { createPropertyListing, uploadPropertyImages } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./list-property.css";
 
+const MAX_IMAGES = 10;
+
 const initialLand = {
   area: "",
   dimensions: "",
@@ -32,6 +34,7 @@ export default function ListPropertyPage() {
   const [land, setLand] = useState(initialLand);
   const [house, setHouse] = useState(initialHouse);
   const [images, setImages] = useState([]);
+  const [imageStatus, setImageStatus] = useState({ type: "", message: "" });
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
 
@@ -63,7 +66,20 @@ export default function ListPropertyPage() {
 
   const handleFiles = (event) => {
     const files = Array.from(event.target.files || []);
-    setImages(files);
+    if (!files.length) return;
+    setImageStatus({ type: "", message: "" });
+    setImages((prev) => {
+      const merged = [...prev, ...files];
+      if (merged.length > MAX_IMAGES) {
+        setImageStatus({
+          type: "error",
+          message: `You can upload up to ${MAX_IMAGES} images.`,
+        });
+        return merged.slice(0, MAX_IMAGES);
+      }
+      return merged;
+    });
+    event.target.value = "";
   };
 
   const handleSubmit = async (event) => {
@@ -97,7 +113,7 @@ export default function ListPropertyPage() {
       const propertyId = response.property?.id;
 
       if (propertyId && images.length) {
-        await uploadPropertyImages(propertyId, images);
+        await uploadPropertyImages(propertyId, images.slice(0, MAX_IMAGES));
       }
 
       setStatus({
@@ -116,6 +132,7 @@ export default function ListPropertyPage() {
       setLand(initialLand);
       setHouse(initialHouse);
       setImages([]);
+      setImageStatus({ type: "", message: "" });
     } catch (err) {
       setStatus({ type: "error", message: err.message });
     } finally {

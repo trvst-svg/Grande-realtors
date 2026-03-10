@@ -22,6 +22,11 @@ export default async function createPropertyInquiryHandler(req, res, next) {
     if (!property) {
       return res.status(404).json({ error: "Property not found" });
     }
+    if (property.owner_id === req.user?.id) {
+      return res
+        .status(403)
+        .json({ error: "Owners cannot contact their own property" });
+    }
 
     const salesHandler = await getSalesHandlerByPropertyId(property.id);
     if (!salesHandler || !salesHandler.email) {

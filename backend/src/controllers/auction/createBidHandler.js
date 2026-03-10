@@ -13,6 +13,11 @@ export default async function createBidHandler(req, res, next) {
     if (!auction) {
       return res.status(404).json({ error: "Auction not found" });
     }
+    if (auction.owner_id === userId) {
+      return res
+        .status(403)
+        .json({ error: "Owners cannot bid on their own property" });
+    }
     if (auction.status !== "open") {
       return res.status(400).json({ error: "Auction is not open" });
     }

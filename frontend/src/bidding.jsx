@@ -9,6 +9,11 @@ export default function BiddingPage() {
   const [auctions, setAuctions] = useState([]);
   const [actionError, setActionError] = useState("");
   const [actioningId, setActioningId] = useState(null);
+  const storedUser =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("gr_user") || "{}")
+      : {};
+  const currentUserId = storedUser?.id;
 
   useEffect(() => {
     fetchAuctions().then(setAuctions).catch(() => setAuctions([]));
@@ -34,6 +39,11 @@ export default function BiddingPage() {
 
   const handleBidNow = async (auctionId) => {
     setActionError("");
+    const target = auctions.find((item) => item.id === auctionId);
+    if (target?.owner_id && target.owner_id === currentUserId) {
+      setActionError("You cannot bid on your own property.");
+      return;
+    }
     const token = localStorage.getItem("gr_token");
     if (!token) {
       navigate("/login");
@@ -60,6 +70,7 @@ export default function BiddingPage() {
   const hero = auctions[0];
   const rest = auctions.slice(1);
   const heroImage = hero?.image ? `${API_BASE_URL}${hero.image}` : "";
+  const heroIsOwner = hero?.owner_id && hero.owner_id === currentUserId;
 
   return (
     <div className="bidding-page">
@@ -95,9 +106,13 @@ export default function BiddingPage() {
               <button
                 type="button"
                 onClick={() => handleBidNow(hero.id)}
-                disabled={actioningId === hero.id}
+                disabled={actioningId === hero.id || heroIsOwner}
               >
-                {actioningId === hero.id ? "Redirecting..." : "Place Your Bid"}
+                {heroIsOwner
+                  ? "Your Listing"
+                  : actioningId === hero.id
+                  ? "Redirecting..."
+                  : "Place Your Bid"}
               </button>
             </div>
           </div>
@@ -109,6 +124,7 @@ export default function BiddingPage() {
         <div className="auction-grid">
           {rest.map((auction) => {
             const imageUrl = auction.image ? `${API_BASE_URL}${auction.image}` : "";
+            const isOwner = auction.owner_id && auction.owner_id === currentUserId;
             return (
             <article key={auction.id} className="auction-card">
               <div className="auction-media">
@@ -123,9 +139,13 @@ export default function BiddingPage() {
                 <button
                   type="button"
                   onClick={() => handleBidNow(auction.id)}
-                  disabled={actioningId === auction.id}
+                  disabled={actioningId === auction.id || isOwner}
                 >
-                  {actioningId === auction.id ? "Redirecting..." : "Bid Now"}
+                  {isOwner
+                    ? "Your Listing"
+                    : actioningId === auction.id
+                    ? "Redirecting..."
+                    : "Bid Now"}
                 </button>
               </div>
             </article>

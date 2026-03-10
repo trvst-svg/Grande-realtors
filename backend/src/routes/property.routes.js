@@ -2,6 +2,9 @@ import { Router } from "express";
 import {
   createPropertyHandler,
   createPropertyInquiryHandler,
+  addFavoriteHandler,
+  removeFavoriteHandler,
+  getFavoriteStatusHandler,
   addPropertyImagesHandler,
   deletePropertyHandler,
   getPropertyHandler,
@@ -20,6 +23,9 @@ router.get("/search", searchPropertiesHandler);
 router.get("/type/:type", listPropertiesByTypeHandler);
 router.post("/", requireAuth, createPropertyHandler);
 router.get("/:id", getPropertyHandler);
+router.get("/:id/favorite", requireAuth, getFavoriteStatusHandler);
+router.post("/:id/favorite", requireAuth, addFavoriteHandler);
+router.delete("/:id/favorite", requireAuth, removeFavoriteHandler);
 router.post("/:id/inquiry", requireAuth, createPropertyInquiryHandler);
 router.post(
   "/:id/images",
