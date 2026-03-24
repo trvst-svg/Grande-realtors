@@ -52,7 +52,6 @@ export default function SignupPage() {
     payload.append("email", form.email);
     payload.append("number", form.number);
     payload.append("password", form.password);
-    payload.append("role", form.role);
     payload.append("citizenshipFront", form.citizenshipFront);
     payload.append("citizenshipBack", form.citizenshipBack);
 
@@ -149,17 +148,6 @@ export default function SignupPage() {
             onChange={handleChange}
             required
           />
-
-          <label htmlFor="role">Account Type</label>
-          <select
-            id="role"
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-          >
-            <option value="buyer">Buyer</option>
-            <option value="seller">Seller</option>
-          </select>
 
           <label htmlFor="citizenshipFront">Citizenship Front</label>
           <input
