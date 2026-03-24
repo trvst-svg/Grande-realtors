@@ -7,16 +7,22 @@ import "./properties.css";
 export default function LandsPage() {
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState({
+    keyword: "",
     location: "",
     type: "All Types",
     minPrice: "",
     maxPrice: "",
+    minSize: "",
+    maxSize: "",
   });
   const [draft, setDraft] = useState({
+    keyword: "",
     location: "",
     type: "All Types",
     minPrice: "",
     maxPrice: "",
+    minSize: "",
+    maxSize: "",
   });
 
   useEffect(() => {
@@ -27,6 +33,13 @@ export default function LandsPage() {
     const matchLocation = filter.location
       ? item.location?.toLowerCase().includes(filter.location.toLowerCase())
       : true;
+    const matchKeyword = filter.keyword
+      ? [item.location, item.description, item.property_type]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .includes(filter.keyword.toLowerCase())
+      : true;
     const matchType =
       filter.type === "All Types"
         ? true
@@ -35,17 +48,31 @@ export default function LandsPage() {
     const price = Number(item.price || 0);
     const matchMin = filter.minPrice ? price >= Number(filter.minPrice) : true;
     const matchMax = filter.maxPrice ? price <= Number(filter.maxPrice) : true;
-    return matchLocation && matchType && matchMin && matchMax;
+    const size = Number(item.area || 0);
+    const matchSizeMin = filter.minSize ? size >= Number(filter.minSize) : true;
+    const matchSizeMax = filter.maxSize ? size <= Number(filter.maxSize) : true;
+    return (
+      matchLocation &&
+      matchKeyword &&
+      matchType &&
+      matchMin &&
+      matchMax &&
+      matchSizeMin &&
+      matchSizeMax
+    );
   });
 
   const handleApply = () => setFilter({ ...draft });
 
   const handleReset = () => {
     const reset = {
+      keyword: "",
       location: "",
       type: "All Types",
       minPrice: "",
       maxPrice: "",
+      minSize: "",
+      maxSize: "",
     };
     setDraft(reset);
     setFilter(reset);
@@ -63,6 +90,17 @@ export default function LandsPage() {
       <section className="filters">
         <h4>Search Filters</h4>
         <div className="filter-grid">
+          <div>
+            <label htmlFor="keyword">Search</label>
+            <input
+              id="keyword"
+              placeholder="Search by location or description"
+              value={draft.keyword}
+              onChange={(e) =>
+                setDraft((prev) => ({ ...prev, keyword: e.target.value }))
+              }
+            />
+          </div>
           <div>
             <label htmlFor="location">Location</label>
             <input
@@ -108,6 +146,28 @@ export default function LandsPage() {
               value={draft.maxPrice}
               onChange={(e) =>
                 setDraft((prev) => ({ ...prev, maxPrice: e.target.value }))
+              }
+            />
+          </div>
+          <div>
+            <label htmlFor="minSize">Min Size (sq.ft)</label>
+            <input
+              id="minSize"
+              placeholder="e.g. 1000"
+              value={draft.minSize}
+              onChange={(e) =>
+                setDraft((prev) => ({ ...prev, minSize: e.target.value }))
+              }
+            />
+          </div>
+          <div>
+            <label htmlFor="maxSize">Max Size (sq.ft)</label>
+            <input
+              id="maxSize"
+              placeholder="e.g. 5000"
+              value={draft.maxSize}
+              onChange={(e) =>
+                setDraft((prev) => ({ ...prev, maxSize: e.target.value }))
               }
             />
           </div>

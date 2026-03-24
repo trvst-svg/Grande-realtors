@@ -34,6 +34,7 @@ export default function AdminUsers() {
         ) {
           localStorage.removeItem("gr_token");
           localStorage.removeItem("gr_user");
+          localStorage.removeItem("gr_refresh_token");
           window.location.href = "/login";
           return;
         }

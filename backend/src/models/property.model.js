@@ -1,5 +1,6 @@
 export { default as addPropertyImages } from "./property/addPropertyImages.js";
 export { default as approvePropertyVerificationRequest } from "./property/approvePropertyVerificationRequest.js";
+export { default as approvePropertyVerificationRequestWithAgent } from "./property/approvePropertyVerificationRequestWithAgent.js";
 export { default as createHouseDetails } from "./property/createHouseDetails.js";
 export { default as createLandDetails } from "./property/createLandDetails.js";
 export { default as createProperty } from "./property/createProperty.js";
@@ -15,6 +16,9 @@ export { default as getSalesHandlerByPropertyId } from "./property/getSalesHandl
 export { default as listPendingPropertyVerificationRequests } from "./property/listPendingPropertyVerificationRequests.js";
 export { default as listProperties } from "./property/listProperties.js";
 export { default as listPropertiesByType } from "./property/listPropertiesByType.js";
+export { default as findSimilarProperties } from "./property/findSimilarProperties.js";
 export { default as rejectPropertyVerificationRequest } from "./property/rejectPropertyVerificationRequest.js";
 export { default as searchProperties } from "./property/searchProperties.js";
 export { default as updateProperty } from "./property/updateProperty.js";
+export { default as upsertHouseDetails } from "./property/upsertHouseDetails.js";
+export { default as upsertLandDetails } from "./property/upsertLandDetails.js";

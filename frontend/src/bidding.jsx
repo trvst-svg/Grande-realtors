@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, fetchAuctions, initiateBidTicket } from "./api.js";
+import { API_BASE_URL, fetchAuctions } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./bidding.css";
 
@@ -8,7 +8,6 @@ export default function BiddingPage() {
   const navigate = useNavigate();
   const [auctions, setAuctions] = useState([]);
   const [actionError, setActionError] = useState("");
-  const [actioningId, setActioningId] = useState(null);
   const storedUser =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("gr_user") || "{}")
@@ -19,24 +18,6 @@ export default function BiddingPage() {
     fetchAuctions().then(setAuctions).catch(() => setAuctions([]));
   }, []);
 
-  const submitEsewaForm = (payment) => {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = payment.gatewayUrl;
-    form.style.display = "none";
-
-    Object.entries(payment.fields || {}).forEach(([key, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = String(value);
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-  };
-
   const handleBidNow = async (auctionId) => {
     setActionError("");
     const target = auctions.find((item) => item.id === auctionId);
@@ -44,33 +25,25 @@ export default function BiddingPage() {
       setActionError("You cannot bid on your own property.");
       return;
     }
-    const token = localStorage.getItem("gr_token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    setActioningId(auctionId);
-    try {
-      const data = await initiateBidTicket(auctionId);
-      if (data.status === "paid") {
-        navigate(`/bidding/${auctionId}`);
-      } else if (data.payment?.gatewayUrl) {
-        submitEsewaForm(data.payment);
-      } else {
-        setActionError("Unable to initiate payment.");
-      }
-    } catch (err) {
-      setActionError(err.message);
-    } finally {
-      setActioningId(null);
-    }
+    navigate(`/bidding/${auctionId}`);
   };
 
   const hero = auctions[0];
   const rest = auctions.slice(1);
   const heroImage = hero?.image ? `${API_BASE_URL}${hero.image}` : "";
   const heroIsOwner = hero?.owner_id && hero.owner_id === currentUserId;
+  const now = new Date();
+
+  const getAuctionStatusText = (auction) => {
+    if (!auction) return "";
+    const startTime = auction.start_time ? new Date(auction.start_time) : null;
+    const endTime = auction.end_time ? new Date(auction.end_time) : null;
+    if (endTime && now > endTime) return "Ended";
+    if (startTime && now < startTime) {
+      return `Starts ${startTime.toLocaleString()}`;
+    }
+    return "Live";
+  };
 
   return (
     <div className="bidding-page">
@@ -101,18 +74,14 @@ export default function BiddingPage() {
                   <strong>15</strong>
                 </div>
               </div>
-              <div className="timer">Auction Ends In 02:45:30</div>
+              <div className="timer">{getAuctionStatusText(hero)}</div>
               {actionError ? <p className="status error">{actionError}</p> : null}
               <button
                 type="button"
                 onClick={() => handleBidNow(hero.id)}
-                disabled={actioningId === hero.id || heroIsOwner}
+                disabled={heroIsOwner}
               >
-                {heroIsOwner
-                  ? "Your Listing"
-                  : actioningId === hero.id
-                  ? "Redirecting..."
-                  : "Place Your Bid"}
+                {heroIsOwner ? "Your Listing" : "View Bid Details"}
               </button>
             </div>
           </div>
@@ -125,10 +94,11 @@ export default function BiddingPage() {
           {rest.map((auction) => {
             const imageUrl = auction.image ? `${API_BASE_URL}${auction.image}` : "";
             const isOwner = auction.owner_id && auction.owner_id === currentUserId;
+            const statusText = getAuctionStatusText(auction);
             return (
             <article key={auction.id} className="auction-card">
               <div className="auction-media">
-                <span className="live-tag">Live</span>
+                <span className="live-tag">{statusText}</span>
                 {imageUrl ? <img src={imageUrl} alt={auction.location} /> : null}
               </div>
               <div className="auction-body">
@@ -139,13 +109,9 @@ export default function BiddingPage() {
                 <button
                   type="button"
                   onClick={() => handleBidNow(auction.id)}
-                  disabled={actioningId === auction.id || isOwner}
+                  disabled={isOwner}
                 >
-                  {isOwner
-                    ? "Your Listing"
-                    : actioningId === auction.id
-                    ? "Redirecting..."
-                    : "Bid Now"}
+                  {isOwner ? "Your Listing" : "Bid Details"}
                 </button>
               </div>
             </article>

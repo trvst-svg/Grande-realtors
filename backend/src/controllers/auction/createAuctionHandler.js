@@ -4,8 +4,7 @@ import { getRoleIdByName } from "../../models/user.model.js";
 
 export default async function createAuctionHandler(req, res, next) {
   try {
-    const { property_id, start_time, end_time, starting_price, status } =
-      req.body;
+    const { property_id, start_time, end_time, starting_price } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
@@ -55,17 +54,22 @@ export default async function createAuctionHandler(req, res, next) {
         .json({ error: "Starting price must be a positive number" });
     }
 
-    if (start_time && end_time) {
-      const startDate = new Date(start_time);
-      const endDate = new Date(end_time);
-      if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-        return res.status(400).json({ error: "Invalid auction dates" });
+    let startDate = null;
+    let endDate = null;
+    if (start_time) {
+      startDate = new Date(start_time);
+      if (Number.isNaN(startDate.getTime())) {
+        return res.status(400).json({ error: "Invalid auction start time" });
       }
-      if (endDate <= startDate) {
-        return res
-          .status(400)
-          .json({ error: "End time must be after start time" });
+    }
+    if (end_time) {
+      endDate = new Date(end_time);
+      if (Number.isNaN(endDate.getTime())) {
+        return res.status(400).json({ error: "Invalid auction end time" });
       }
+    }
+    if (startDate && endDate && endDate <= startDate) {
+      return res.status(400).json({ error: "End time must be after start time" });
     }
 
     const existing = await getAuctionByPropertyId(property.id);
@@ -73,10 +77,13 @@ export default async function createAuctionHandler(req, res, next) {
       return res.status(409).json({ error: "Auction already exists" });
     }
 
+    const now = new Date();
+    const status = startDate && startDate > now ? "scheduled" : "open";
+
     const auction = await createAuction({
       property_id: property.id,
-      start_time: start_time || null,
-      end_time: end_time || null,
+      start_time: startDate ? startDate.toISOString() : null,
+      end_time: endDate ? endDate.toISOString() : null,
       starting_price: startingValue,
       status,
     });

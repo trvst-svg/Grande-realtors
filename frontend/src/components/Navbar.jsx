@@ -1,4 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { logoutUser } from "../api.js";
 import "./navbar.css";
 
 const navItems = [
@@ -6,6 +7,7 @@ const navItems = [
   { label: "Lands", to: "/lands" },
   { label: "Houses", to: "/houses" },
   { label: "Bidding", to: "/bidding" },
+  { label: "Messages", to: "/messages" },
   { label: "Contact", to: "/contact" },
   { label: "EMI Calculator", to: "/emi" },
 ];
@@ -19,9 +21,8 @@ export default function Navbar({
   const hasToken =
     typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
 
-  const handleLogout = () => {
-    localStorage.removeItem("gr_token");
-    localStorage.removeItem("gr_user");
+  const handleLogout = async () => {
+    await logoutUser();
     navigate("/login");
   };
 

@@ -1,5 +1,12 @@
-import { getPropertyById } from "../../models/property.model.js";
+import {
+  findSimilarProperties,
+  getHouseDetailsByPropertyId,
+  getLandDetailsByPropertyId,
+  getPropertyById,
+} from "../../models/property.model.js";
+import { getUserById } from "../../models/user.model.js";
 import { addFavorite } from "../../models/favorite.model.js";
+import { sendSimilarListingsEmail } from "../../utils/mailer.js";
 
 export default async function addFavoriteHandler(req, res, next) {
   try {
@@ -19,6 +26,38 @@ export default async function addFavoriteHandler(req, res, next) {
     }
 
     await addFavorite(userId, propertyId);
+
+    try {
+      const user = await getUserById(userId);
+      if (user?.email) {
+        let details = null;
+        if (property.property_type === "land") {
+          details = await getLandDetailsByPropertyId(property.id);
+        } else if (property.property_type === "house") {
+          details = await getHouseDetailsByPropertyId(property.id);
+        }
+
+        const listings = await findSimilarProperties({
+          property,
+          details,
+          limit: 5,
+        });
+
+        if (listings.length) {
+          await sendSimilarListingsEmail({
+            to: user.email,
+            name: `${user.firstname || ""} ${user.lastname || ""}`.trim(),
+            property,
+            listings,
+            frontendBase: process.env.FRONTEND_URL || "http://localhost:5173",
+          });
+        }
+      }
+    } catch (err) {
+      if (err.code !== "MAIL_NOT_CONFIGURED") {
+        console.error("Failed to send similar listings email", err);
+      }
+    }
     return res.json({ message: "Property bookmarked", isBookmarked: true });
   } catch (err) {
     return next(err);

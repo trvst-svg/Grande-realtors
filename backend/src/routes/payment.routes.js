@@ -1,12 +1,8 @@
 import { Router } from "express";
-import {
-  handleEsewaFailure,
-  handleEsewaSuccess,
-} from "../controllers/payment.controller.js";
+import { handleKhaltiReturn } from "../controllers/payment.controller.js";
 
 const router = Router();
 
-router.all("/esewa/success", handleEsewaSuccess);
-router.all("/esewa/failure", handleEsewaFailure);
+router.get("/khalti/return", handleKhaltiReturn);
 
 export default router;

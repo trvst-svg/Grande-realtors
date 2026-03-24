@@ -28,6 +28,7 @@ export default function UserDashboard() {
         ) {
           localStorage.removeItem("gr_token");
           localStorage.removeItem("gr_user");
+          localStorage.removeItem("gr_refresh_token");
           navigate("/login");
           return;
         }
@@ -91,11 +92,19 @@ export default function UserDashboard() {
                 <div className="panel-actions">
                   <span className="muted">NPR {property.price}</span>
                   <Link
-                    className="mini-action"
-                    to={`/auctions/new/${property.id}`}
+                    className="mini-action secondary"
+                    to={`/properties/${property.id}/edit`}
                   >
-                    List for Auction
+                    Edit
                   </Link>
+                  {!property.auction_id ? (
+                    <Link
+                      className="mini-action"
+                      to={`/auctions/new/${property.id}`}
+                    >
+                      List for Auction
+                    </Link>
+                  ) : null}
                 </div>
               </div>
             ))

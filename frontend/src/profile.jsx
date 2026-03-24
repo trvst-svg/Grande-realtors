@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { fetchUserProfile } from "./api.js";
 import "./profile.css";
@@ -28,6 +28,7 @@ export default function ProfilePage() {
         ) {
           localStorage.removeItem("gr_token");
           localStorage.removeItem("gr_user");
+          localStorage.removeItem("gr_refresh_token");
           navigate("/login");
           return;
         }
@@ -121,10 +122,21 @@ export default function ProfilePage() {
                 data.myProperties.map((property) => (
                   <div key={property.id} className="property-mini">
                     <div className="mini-thumb" />
-                    <div>
+                    <div className="mini-body">
                       <strong>{property.property_type}</strong>
                       <p>{property.location}</p>
                       <span>NPR {property.price}</span>
+                      <div className="mini-actions">
+                        <Link className="mini-link" to={`/properties/${property.id}`}>
+                          View
+                        </Link>
+                        <Link
+                          className="mini-link secondary"
+                          to={`/properties/${property.id}/edit`}
+                        >
+                          Edit
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))

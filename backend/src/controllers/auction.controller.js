@@ -4,3 +4,6 @@ export { default as getAuctionHandler } from "./auction/getAuctionHandler.js";
 export { default as listAuctionsHandler } from "./auction/listAuctionsHandler.js";
 export { default as listBidsHandler } from "./auction/listBidsHandler.js";
 export { default as updateAuctionStatusHandler } from "./auction/updateAuctionStatusHandler.js";
+export { default as streamAuctionHandler } from "./auction/streamAuctionHandler.js";
+export { default as updateBidStatusHandler } from "./auction/updateBidStatusHandler.js";
+export { default as getMyBidHandler } from "./auction/getMyBidHandler.js";

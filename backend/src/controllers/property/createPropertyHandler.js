@@ -6,6 +6,7 @@ import {
   createPropertyVerificationRequest,
   getPropertyTypeIdByName,
 } from "../../models/property.model.js";
+import { getRoleIdByName } from "../../models/user.model.js";
 
 export default async function createPropertyHandler(req, res, next) {
   try {
@@ -27,6 +28,14 @@ export default async function createPropertyHandler(req, res, next) {
 
     if (!owner_id) {
       return res.status(401).json({ error: "Authorization required" });
+    }
+
+    const sellerRoleId = await getRoleIdByName("seller");
+    const userRoleId = await getRoleIdByName("user");
+    const isSeller =
+      req.user?.role_id === sellerRoleId || req.user?.role_id === userRoleId;
+    if (!isSeller) {
+      return res.status(403).json({ error: "Only sellers can list properties" });
     }
 
     if (!location || !price || (!property_type && !property_type_id)) {

@@ -44,6 +44,9 @@ export default function LoginPage() {
       if (data.token) {
         localStorage.setItem("gr_token", data.token);
       }
+      if (data.refresh_token) {
+        localStorage.setItem("gr_refresh_token", data.refresh_token);
+      }
       const role = data.user?.role;
       if (role === "admin") {
         navigate("/dashboard/admin");

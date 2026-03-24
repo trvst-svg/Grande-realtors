@@ -1,12 +1,5 @@
 import bcrypt from "bcrypt";
-
-import {
-  createUser,
-  findUserByEmail,
-  findUserByNumber,
-  getRoleIdByName,
-  getRoleNameById,
-} from "../../models/user.model.js";
+import {createUser,findUserByEmail,findUserByNumber,getRoleIdByName,getRoleNameById,} from "../../models/user.model.js";
 import buildUserPayload from "./buildUserPayload.js";
 import cleanupUploads from "./cleanupUploads.js";
 
@@ -47,12 +40,8 @@ export default async function signup(req, res, next) {
     }
 
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const roleId = await getRoleIdByName("user");
-    if (!roleId) {
-      await cleanupUploads(uploadPaths);
-      return res.status(500).json({ error: "User role not configured" });
-    }
+    const hashedPassword = await bcrypt.hash(password, saltRounds);  
+    const roleId = 1
 
     const user = await createUser({
       firstname,
@@ -70,7 +59,9 @@ export default async function signup(req, res, next) {
       message: "Signup request submitted for approval",
       user: buildUserPayload(user, roleName),
     });
-  } catch (err) {
+  } 
+
+  catch (err) {
     const files = req.files || {};
     const uploadPaths = [files.citizenshipFront?.[0], files.citizenshipBack?.[0]]
       .filter(Boolean)

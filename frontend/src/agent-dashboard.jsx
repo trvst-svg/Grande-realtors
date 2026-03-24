@@ -28,6 +28,7 @@ export default function AgentDashboard() {
         ) {
           localStorage.removeItem("gr_token");
           localStorage.removeItem("gr_user");
+          localStorage.removeItem("gr_refresh_token");
           navigate("/login");
           return;
         }

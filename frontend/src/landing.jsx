@@ -100,8 +100,7 @@ export default function LandingPage() {
                   <img src={src} alt={`Featured property ${index + 1}`} />
                 ) : (
                   <div className="slide-placeholder">
-                    <p>Add your sliding images here</p>
-                    <span>Update the `sliderImages` array in landing.jsx.</span>
+                    <span>Slider imagees</span>
                   </div>
                 )}
               </div>

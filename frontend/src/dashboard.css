@@ -147,6 +147,11 @@
   text-decoration: none;
 }
 
+.mini-action.secondary {
+  background: #c9a24d;
+  color: #111;
+}
+
 .auction-form {
   display: grid;
   gap: 10px;
@@ -501,6 +506,20 @@
 .property-request-actions {
   display: grid;
   gap: 8px;
+}
+
+.handler-label {
+  font-size: 11px;
+  color: #6d655b;
+}
+
+.handler-select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d9cdbd;
+  background: #fff;
+  font-size: 12px;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
 }
 
 @media (max-width: 1100px) {

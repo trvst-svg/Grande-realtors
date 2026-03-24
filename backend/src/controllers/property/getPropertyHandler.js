@@ -5,6 +5,7 @@ import {
   getPropertyWithVerification,
   getSalesHandlerByPropertyId,
 } from "../../models/property.model.js";
+import { getSellerAverageRating } from "../../models/rating.model.js";
 
 export default async function getPropertyHandler(req, res, next) {
   try {
@@ -14,6 +15,9 @@ export default async function getPropertyHandler(req, res, next) {
     }
     const images = await getPropertyImages(property.id);
     const salesHandler = await getSalesHandlerByPropertyId(property.id);
+    const sellerRating = property.owner_id
+      ? await getSellerAverageRating(property.owner_id)
+      : null;
 
     let details = null;
     if (property.property_type === "house") {
@@ -27,6 +31,7 @@ export default async function getPropertyHandler(req, res, next) {
       images,
       details,
       sales_handler: salesHandler,
+      seller_rating: sellerRating,
     });
   } catch (err) {
     next(err);

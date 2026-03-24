@@ -1,4 +1,9 @@
-import { getPropertyById, updateProperty } from "../../models/property.model.js";
+import {
+  getPropertyById,
+  updateProperty,
+  upsertHouseDetails,
+  upsertLandDetails,
+} from "../../models/property.model.js";
 import { getRoleIdByName } from "../../models/user.model.js";
 
 export default async function updatePropertyHandler(req, res, next) {
@@ -28,6 +33,8 @@ export default async function updatePropertyHandler(req, res, next) {
       property_type_id,
       listing_purpose,
       listing_type,
+      land,
+      house,
     } = req.body;
     const updated = await updateProperty(req.params.id, {
       location,
@@ -41,6 +48,13 @@ export default async function updatePropertyHandler(req, res, next) {
     if (!updated) {
       return res.status(404).json({ error: "Property not found" });
     }
+    if (land) {
+      await upsertLandDetails({ property_id: property.id, ...land });
+    }
+    if (house) {
+      await upsertHouseDetails({ property_id: property.id, ...house });
+    }
+
     res.json({ message: "Property updated", property: updated });
   } catch (err) {
     next(err);

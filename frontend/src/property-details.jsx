@@ -8,6 +8,7 @@ import {
   addPropertyBookmark,
   removePropertyBookmark,
   sendPropertyInquiry,
+  sendMessage,
 } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./property-details.css";
@@ -43,6 +44,8 @@ export default function PropertyDetailsPage() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
   const [bookmarkStatus, setBookmarkStatus] = useState({ type: "", message: "" });
+  const [messageDraft, setMessageDraft] = useState("");
+  const [messageStatus, setMessageStatus] = useState({ type: "", message: "" });
   const hasToken =
     typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
 
@@ -94,6 +97,7 @@ export default function PropertyDetailsPage() {
       stored = {};
     }
     if (!stored.id) return;
+    setCurrentUser((prev) => prev || stored);
     fetchUserProfile(stored.id)
       .then((data) => {
         setCurrentUser(data.user);
@@ -325,6 +329,14 @@ export default function PropertyDetailsPage() {
                   : "-"}
               </p>
             </div>
+            <div>
+              <span className="label">Seller Rating</span>
+              <p>
+                {property.seller_rating
+                  ? `${property.seller_rating.avg_rating} (${property.seller_rating.rating_count})`
+                  : "Not rated"}
+              </p>
+            </div>
           </div>
 
           <div className="details-description">
@@ -385,12 +397,7 @@ export default function PropertyDetailsPage() {
                       type: "success",
                       message: data.message || "Inquiry sent.",
                     });
-                    setInquiry({
-                      name: "",
-                      email: "",
-                      phone: "",
-                      message: "",
-                    });
+                    setInquiry((prev) => ({ ...prev, message: "" }));
                   } catch (err) {
                     setInquiryStatus({ type: "error", message: err.message });
                   } finally {
@@ -408,7 +415,6 @@ export default function PropertyDetailsPage() {
                   }
                   required
                   disabled={!salesHandler || !hasToken || isOwner}
-                  readOnly={Boolean(currentUser)}
                 />
 
                 <label htmlFor="inquiry-email">Email</label>
@@ -421,7 +427,6 @@ export default function PropertyDetailsPage() {
                   }
                   required
                   disabled={!salesHandler || !hasToken || isOwner}
-                  readOnly={Boolean(currentUser)}
                 />
 
                 <label htmlFor="inquiry-phone">Phone (optional)</label>
@@ -459,6 +464,62 @@ export default function PropertyDetailsPage() {
                   disabled={!salesHandler || !hasToken || isOwner || sending}
                 >
                   {sending ? "Sending..." : "Send Inquiry"}
+                </button>
+              </form>
+            </div>
+
+            <div className="contact-form">
+              <h4>Message the Owner</h4>
+              <p className="muted">
+                Use in-app messaging to contact the property owner directly.
+              </p>
+              {!hasToken ? (
+                <p className="status error">
+                  Please sign in to send a message.
+                </p>
+              ) : null}
+              {isOwner ? (
+                <p className="status error">
+                  Owners cannot message themselves.
+                </p>
+              ) : null}
+              <form
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setMessageStatus({ type: "", message: "" });
+                  try {
+                    await sendMessage({
+                      property_id: property.id,
+                      receiver_id: property.owner_id,
+                      body: messageDraft,
+                    });
+                    setMessageDraft("");
+                    setMessageStatus({
+                      type: "success",
+                      message: "Message sent. Check Messages for replies.",
+                    });
+                  } catch (err) {
+                    setMessageStatus({ type: "error", message: err.message });
+                  }
+                }}
+              >
+                <label htmlFor="message-body">Message</label>
+                <textarea
+                  id="message-body"
+                  rows="4"
+                  value={messageDraft}
+                  onChange={(event) => setMessageDraft(event.target.value)}
+                  required
+                  disabled={!hasToken || isOwner}
+                  placeholder="Ask about this property..."
+                />
+                {messageStatus.message ? (
+                  <p className={`status ${messageStatus.type}`}>
+                    {messageStatus.message}
+                  </p>
+                ) : null}
+                <button type="submit" disabled={!hasToken || isOwner}>
+                  Send Message
                 </button>
               </form>
             </div>

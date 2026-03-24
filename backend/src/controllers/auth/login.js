@@ -5,7 +5,15 @@ import {
   findUserByEmail,
   getRoleNameById,
 } from "../../models/user.model.js";
+import { createRefreshToken } from "../../models/refreshToken.model.js";
 import buildUserPayload from "./buildUserPayload.js";
+import {
+  buildRefreshCookieOptions,
+  generateRefreshToken,
+  getRefreshTokenCookieName,
+  getRefreshTokenExpiry,
+  hashRefreshToken,
+} from "../../utils/refreshToken.js";
 
 export default async function login(req, res, next) {
   try {
@@ -45,10 +53,25 @@ export default async function login(req, res, next) {
     const secret =
       process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
     const token = jwt.sign(payload, secret, { expiresIn: "5h" });
+    const refreshToken = generateRefreshToken();
+    const refreshTokenHash = hashRefreshToken(refreshToken);
+    const refreshExpiresAt = getRefreshTokenExpiry();
+    await createRefreshToken({
+      userId: user.id,
+      tokenHash: refreshTokenHash,
+      expiresAt: refreshExpiresAt,
+    });
+
+    res.cookie(
+      getRefreshTokenCookieName(),
+      refreshToken,
+      buildRefreshCookieOptions()
+    );
 
     return res.status(200).json({
       message: "Login successful",
       token,
+      refresh_token: refreshToken,
       user: buildUserPayload(user, roleName),
     });
   } catch (err) {

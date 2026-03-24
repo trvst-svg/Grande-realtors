@@ -21,9 +21,11 @@ import AuctionBidPage from "./auction-bid.jsx";
 import ForgotPasswordPage from "./forgot-password.jsx";
 import ResetPasswordPage from "./reset-password.jsx";
 import PropertyDetailsPage from "./property-details.jsx";
+import EditPropertyPage from "./edit-property.jsx";
 import EmiCalculatorPage from "./emi-calculator.jsx";
 import SalesHandlersPage from "./sales-handlers.jsx";
 import SalesHandlerProfilePage from "./sales-handler-profile.jsx";
+import MessagesPage from "./messages.jsx";
 
 export default function App() {
   const blockAdmin = (element) => <AdminBlocker>{element}</AdminBlocker>;
@@ -38,8 +40,13 @@ export default function App() {
       <Route path="/bidding/:id" element={blockAdmin(<AuctionBidPage />)} />
       <Route path="/emi" element={blockAdmin(<EmiCalculatorPage />)} />
       <Route path="/properties/:id" element={blockAdmin(<PropertyDetailsPage />)} />
+      <Route
+        path="/properties/:id/edit"
+        element={blockAdmin(<EditPropertyPage />)}
+      />
       <Route path="/sales-handlers" element={blockAdmin(<SalesHandlersPage />)} />
       <Route path="/sales-handlers/:id" element={blockAdmin(<SalesHandlerProfilePage />)} />
+      <Route path="/messages" element={blockAdmin(<MessagesPage />)} />
       <Route path="/contact" element={blockAdmin(<ContactPage />)} />
       <Route path="/profile" element={blockAdmin(<ProfilePage />)} />
       <Route path="/list-property" element={blockAdmin(<ListPropertyPage />)} />

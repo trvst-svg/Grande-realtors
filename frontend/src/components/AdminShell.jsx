@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { logoutUser } from "../api.js";
 import "../dashboard.css";
 
 export default function AdminShell({ title, subtitle, children }) {
@@ -14,9 +15,8 @@ export default function AdminShell({ title, subtitle, children }) {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("gr_token");
-    localStorage.removeItem("gr_user");
+  const handleLogout = async () => {
+    await logoutUser();
     navigate("/login");
   };
 

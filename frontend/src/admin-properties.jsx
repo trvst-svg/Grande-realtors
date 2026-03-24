@@ -3,6 +3,7 @@ import {
   API_BASE_URL,
   approvePropertyRequest,
   fetchPropertyRequests,
+  fetchSalesHandlers,
   rejectPropertyRequest,
 } from "./api.js";
 import AdminShell from "./components/AdminShell.jsx";
@@ -14,6 +15,8 @@ export default function AdminProperties() {
   const [error, setError] = useState("");
   const [actionStatus, setActionStatus] = useState({ type: "", message: "" });
   const [actioningId, setActioningId] = useState(null);
+  const [handlers, setHandlers] = useState([]);
+  const [handlerSelection, setHandlerSelection] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +36,7 @@ export default function AdminProperties() {
         ) {
           localStorage.removeItem("gr_token");
           localStorage.removeItem("gr_user");
+          localStorage.removeItem("gr_refresh_token");
           window.location.href = "/login";
           return;
         }
@@ -47,11 +51,29 @@ export default function AdminProperties() {
     };
   }, []);
 
+  useEffect(() => {
+    fetchSalesHandlers()
+      .then((items) => {
+        setHandlers(items);
+      })
+      .catch(() => {
+        setHandlers([]);
+      });
+  }, []);
+
   const handleApprove = async (requestId) => {
     setActionStatus({ type: "", message: "" });
     setActioningId(requestId);
     try {
-      await approvePropertyRequest(requestId);
+      const agentId = handlerSelection[requestId];
+      if (!agentId) {
+        setActionStatus({
+          type: "error",
+          message: "Select a sales handler before approving.",
+        });
+        return;
+      }
+      await approvePropertyRequest(requestId, agentId);
       setRequests((prev) => prev.filter((item) => item.id !== requestId));
       setActionStatus({ type: "success", message: "Property approved." });
     } catch (err) {
@@ -88,6 +110,11 @@ export default function AdminProperties() {
           {actionStatus.message ? (
             <p className={`status ${actionStatus.type}`}>{actionStatus.message}</p>
           ) : null}
+          {!loading && !handlers.length ? (
+            <p className="status error">
+              No sales handlers available. Add at least one to approve listings.
+            </p>
+          ) : null}
 
           {loading ? (
             <p className="muted">Loading property requests...</p>
@@ -123,11 +150,36 @@ export default function AdminProperties() {
                       </div>
                     </div>
                     <div className="property-request-actions">
+                      <label className="handler-label" htmlFor={`handler-${item.id}`}>
+                        Assign Sales Handler
+                      </label>
+                      <select
+                        id={`handler-${item.id}`}
+                        className="handler-select"
+                        value={handlerSelection[item.id] || ""}
+                        onChange={(event) =>
+                          setHandlerSelection((prev) => ({
+                            ...prev,
+                            [item.id]: event.target.value,
+                          }))
+                        }
+                      >
+                        <option value="">Select handler</option>
+                        {handlers.map((handler) => (
+                          <option key={handler.id} value={handler.id}>
+                            {handler.firstname} {handler.lastname}
+                          </option>
+                        ))}
+                      </select>
                       <button
                         type="button"
                         className="approve-btn"
                         onClick={() => handleApprove(item.id)}
-                        disabled={actioningId === item.id}
+                        disabled={
+                          actioningId === item.id ||
+                          !handlers.length ||
+                          !handlerSelection[item.id]
+                        }
                       >
                         Approve
                       </button>

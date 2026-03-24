@@ -41,6 +41,7 @@ export default function ListPropertyPage() {
   const user = useMemo(() => {
     return JSON.parse(localStorage.getItem("gr_user") || "{}");
   }, []);
+  const isSeller = user.role === "seller" || user.role === "user";
 
   useEffect(() => {
     const token = localStorage.getItem("gr_token");
@@ -153,6 +154,11 @@ export default function ListPropertyPage() {
       </section>
 
       <form className="list-form" onSubmit={handleSubmit}>
+        {!isSeller ? (
+          <p className="status error">
+            Only sellers can list properties. Please create a seller account.
+          </p>
+        ) : null}
         <section className="form-card">
           <h2>Contact Details</h2>
           <p className="muted">Based on your profile information.</p>
@@ -359,13 +365,16 @@ export default function ListPropertyPage() {
           <h2>Images</h2>
           <input type="file" accept="image/*" multiple onChange={handleFiles} />
           <p className="muted">Upload up to 10 images.</p>
+          {imageStatus.message ? (
+            <p className={`status ${imageStatus.type}`}>{imageStatus.message}</p>
+          ) : null}
         </section>
 
         {status.message ? (
           <p className={`status ${status.type}`}>{status.message}</p>
         ) : null}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading || !isSeller}>
           {loading ? "Submitting..." : "Submit for Verification"}
         </button>
       </form>
