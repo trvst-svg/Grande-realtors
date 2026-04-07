@@ -47,7 +47,8 @@ CREATE TABLE properties (
   listing_purpose VARCHAR(50) DEFAULT 'sale',
   listing_type VARCHAR(50),
   sale_status VARCHAR(50) DEFAULT 'available',
-  listed_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+  listed_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE lands (

@@ -15,7 +15,7 @@ function getFrontendBaseUrl(req) {
 async function lookupKhaltiPayment(pidx) {
   const lookupUrl =
     process.env.KHALTI_LOOKUP_URL ||
-    "https://a.khalti.com/api/v2/epayment/lookup/";
+    "https://dev.khalti.com/api/v2/epayment/lookup/";
   const secretKey = process.env.KHALTI_SECRET_KEY;
   if (!secretKey) {
     const error = new Error("Khalti secret key is not configured");

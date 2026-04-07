@@ -121,80 +121,100 @@ export default function AdminProperties() {
           ) : error ? (
             <p className="muted">{error}</p>
           ) : requests.length ? (
-            <div className="property-request-list">
-              {requests.map((item) => {
-                const imageUrl = item.image ? `${API_BASE_URL}${item.image}` : "";
-                return (
-                  <div key={item.id} className="property-request-card">
-                    <div className="property-request-media">
-                      {imageUrl ? (
-                        <img src={imageUrl} alt={item.location} />
-                      ) : (
-                        <div className="image-placeholder">No image</div>
-                      )}
-                    </div>
-                    <div className="property-request-body">
-                      <div>
-                        <h3>{item.property_type}</h3>
-                        <p>{item.location}</p>
-                        <span>NPR {item.price}</span>
-                      </div>
-                      <div className="property-request-meta">
-                        <span>
-                          Owner: {item.firstname} {item.lastname}
-                        </span>
-                        <span>{item.email}</span>
-                        <span>
-                          Listed: {new Date(item.listed_date).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="property-request-actions">
-                      <label className="handler-label" htmlFor={`handler-${item.id}`}>
-                        Assign Sales Handler
-                      </label>
-                      <select
-                        id={`handler-${item.id}`}
-                        className="handler-select"
-                        value={handlerSelection[item.id] || ""}
-                        onChange={(event) =>
-                          setHandlerSelection((prev) => ({
-                            ...prev,
-                            [item.id]: event.target.value,
-                          }))
-                        }
-                      >
-                        <option value="">Select handler</option>
-                        {handlers.map((handler) => (
-                          <option key={handler.id} value={handler.id}>
-                            {handler.firstname} {handler.lastname}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        className="approve-btn"
-                        onClick={() => handleApprove(item.id)}
-                        disabled={
-                          actioningId === item.id ||
-                          !handlers.length ||
-                          !handlerSelection[item.id]
-                        }
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        className="reject-btn"
-                        onClick={() => handleReject(item.id)}
-                        disabled={actioningId === item.id}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="property-request-table-wrap">
+              <table className="property-request-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Preview</th>
+                    <th scope="col">Property</th>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Listed</th>
+                    <th scope="col">Sales Handler</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map((item) => {
+                    const imageUrl = item.image ? `${API_BASE_URL}${item.image}` : "";
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          {imageUrl ? (
+                            <img
+                              className="property-request-thumbnail"
+                              src={imageUrl}
+                              alt={item.location}
+                            />
+                          ) : (
+                            <div className="table-image-placeholder">No image</div>
+                          )}
+                        </td>
+                        <td>
+                          <div className="property-cell">
+                            <strong>{item.property_type}</strong>
+                            <span>{item.location}</span>
+                            <span>NPR {item.price}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="property-meta-stack">
+                            <strong>
+                              {item.firstname} {item.lastname}
+                            </strong>
+                            <span>{item.email}</span>
+                          </div>
+                        </td>
+                        <td>{new Date(item.listed_date).toLocaleDateString()}</td>
+                        <td>
+                          <select
+                            id={`handler-${item.id}`}
+                            className="handler-select"
+                            aria-label={`Sales handler for property request ${item.id}`}
+                            value={handlerSelection[item.id] || ""}
+                            onChange={(event) =>
+                              setHandlerSelection((prev) => ({
+                                ...prev,
+                                [item.id]: event.target.value,
+                              }))
+                            }
+                          >
+                            <option value="">Select handler</option>
+                            {handlers.map((handler) => (
+                              <option key={handler.id} value={handler.id}>
+                                {handler.firstname} {handler.lastname}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td>
+                          <div className="property-request-actions-inline">
+                            <button
+                              type="button"
+                              className="approve-btn"
+                              onClick={() => handleApprove(item.id)}
+                              disabled={
+                                actioningId === item.id ||
+                                !handlers.length ||
+                                !handlerSelection[item.id]
+                              }
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              className="reject-btn"
+                              onClick={() => handleReject(item.id)}
+                              disabled={actioningId === item.id}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
             <p className="muted">No pending property requests.</p>
