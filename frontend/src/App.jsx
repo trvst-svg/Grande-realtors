@@ -28,6 +28,7 @@ import SalesHandlerProfilePage from "./sales-handler-profile.jsx";
 import MessagesPage from "./messages.jsx";
 
 export default function App() {
+  // Admin users are routed into the back-office flow instead of public pages.
   const blockAdmin = (element) => <AdminBlocker>{element}</AdminBlocker>;
 
   return (

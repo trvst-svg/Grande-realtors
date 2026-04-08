@@ -19,13 +19,16 @@ const app = express();
 
 const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
 
+// Keep credentialed browser requests scoped to the configured frontend origin.
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Expose uploaded assets directly so the frontend can render stored media files.
 app.use("/uploads/users", express.static("useruploads"));
 app.use("/uploads/properties", express.static("propertyuploads"));
 
+// Lightweight probe for local smoke tests and deployment health checks.
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
@@ -45,6 +48,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentRoutes);
 
 app.use((err, _req, res, _next) => {
+  // Normalize unhandled errors into the JSON envelope expected by the client.
   const status = err.status || 500;
   res.status(status).json({ error: err.message || "Server error" });
 });

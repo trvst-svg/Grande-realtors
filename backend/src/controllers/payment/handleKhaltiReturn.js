@@ -7,6 +7,7 @@ import {
 function getFrontendBaseUrl(req) {
   const envUrl = process.env.FRONTEND_URL;
   if (envUrl) return envUrl.replace(/\/$/, "");
+  // Khalti callbacks may not include a reliable Origin header in every environment.
   const origin = req.headers.origin;
   if (origin) return origin;
   return "http://localhost:5173";
@@ -73,11 +74,13 @@ export default async function handleKhaltiReturn(req, res, next) {
       return res.redirect(`${frontendBase}/bidding?payment=failed`);
     }
 
+    // Reconcile the callback against the stored ticket so pricing cannot drift.
     if (Number(ticket.amount) * 100 !== amount) {
       return res.redirect(`${frontendBase}/bidding?payment=failed`);
     }
 
     if (status === "Completed") {
+      // Return handlers can be revisited, so keep the state transition idempotent.
       if (ticket.status !== "paid") {
         await markBidTicketPaid({
           transactionUuid,

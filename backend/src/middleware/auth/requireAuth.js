@@ -12,6 +12,7 @@ export default function requireAuth(req, res, next) {
     const secret =
       process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
     const payload = jwt.verify(token, secret);
+    // Downstream handlers use req.user as the authenticated request context.
     req.user = payload;
     return next();
   } catch (err) {

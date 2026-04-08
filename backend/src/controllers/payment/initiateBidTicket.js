@@ -76,6 +76,7 @@ export default async function initiateBidTicket(req, res, next) {
     const userRoleId = await getRoleIdByName("user");
     const isBuyer =
       req.user?.role_id === buyerRoleId || req.user?.role_id === userRoleId;
+    // Bid tickets are limited to buyer-facing roles to keep auction ownership clean.
     if (!isBuyer) {
       return res.status(403).json({ error: "Only buyers can purchase bid tickets" });
     }
@@ -134,6 +135,7 @@ export default async function initiateBidTicket(req, res, next) {
       },
     });
 
+    // Persist the pending ticket before redirecting the user to Khalti checkout.
     const ticket = await upsertBidTicket({
       auctionId,
       userId,

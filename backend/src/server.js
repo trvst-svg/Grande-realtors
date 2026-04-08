@@ -7,5 +7,6 @@ configDotenv();
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
+  // Start background auction polling only after the HTTP server is ready.
   startAuctionStartNotifier();
 });

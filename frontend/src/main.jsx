@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
+  // Routing is handled entirely on the client side.
   <BrowserRouter>
     <App />
   </BrowserRouter>

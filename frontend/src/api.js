@@ -3,6 +3,7 @@ export const API_BASE_URL =
 
 const REFRESH_TOKEN_KEY = "gr_refresh_token";
 
+// The frontend keeps the short-lived access token and long-lived refresh token separately.
 function getAuthToken() {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("gr_token");
@@ -38,6 +39,7 @@ function withAuthHeaders(headers = {}) {
 function normalizeHeaders(headers) {
   if (!headers) return {};
   if (headers instanceof Headers) {
+    // Convert Fetch's Headers object so retry logic can merge Authorization cleanly.
     return Object.fromEntries(headers.entries());
   }
   return headers;
@@ -84,6 +86,7 @@ async function authFetch(url, options = {}) {
   }
 
   try {
+    // Retry once after a silent refresh so individual screens stay simple.
     await refreshAccessToken();
   } catch {
     return response;
@@ -192,11 +195,14 @@ export async function fetchProperty(propertyId) {
 }
 
 export async function sendPropertyInquiry(propertyId, payload) {
-  const response = await authFetch(`${API_BASE_URL}/api/properties/${propertyId}/inquiry`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const response = await authFetch(
+    `${API_BASE_URL}/api/properties/${propertyId}/inquiry`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to send inquiry");
@@ -216,9 +222,12 @@ export async function fetchPropertyBookmarkStatus(propertyId) {
 }
 
 export async function addPropertyBookmark(propertyId) {
-  const response = await authFetch(`${API_BASE_URL}/api/properties/${propertyId}/favorite`, {
-    method: "POST",
-  });
+  const response = await authFetch(
+    `${API_BASE_URL}/api/properties/${propertyId}/favorite`,
+    {
+      method: "POST",
+    }
+  );
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to bookmark property");
@@ -227,9 +236,12 @@ export async function addPropertyBookmark(propertyId) {
 }
 
 export async function removePropertyBookmark(propertyId) {
-  const response = await authFetch(`${API_BASE_URL}/api/properties/${propertyId}/favorite`, {
-    method: "DELETE",
-  });
+  const response = await authFetch(
+    `${API_BASE_URL}/api/properties/${propertyId}/favorite`,
+    {
+      method: "DELETE",
+    }
+  );
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to remove bookmark");

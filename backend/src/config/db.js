@@ -14,9 +14,12 @@ const pool = new Pool({
 });
 
 pool.on("connect", () => {
+
 });
 
+
 pool.on("error", (err) => {
+  // Pool-level failures usually leave the API in a degraded state, so fail fast.
   console.error("Unexpected database error:", err);
   process.exit(-1);
 });

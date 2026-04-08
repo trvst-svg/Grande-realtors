@@ -29,6 +29,7 @@ export default async function login(req, res, next) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // Approval status is enforced before issuing tokens so admins control access.
     if (user.approval_status === "pending") {
       return res
         .status(403)
@@ -52,6 +53,7 @@ export default async function login(req, res, next) {
     const payload = { id: user.id, email: user.email, role_id: user.role_id };
     const secret =
       process.env.JWT_SECRET || process.env.SECRET_KEY || "dev-secret";
+    // Keep the access token short-lived and rely on refresh-token rotation for sessions.
     const token = jwt.sign(payload, secret, { expiresIn: "5h" });
     const refreshToken = generateRefreshToken();
     const refreshTokenHash = hashRefreshToken(refreshToken);
@@ -68,6 +70,7 @@ export default async function login(req, res, next) {
       buildRefreshCookieOptions()
     );
 
+    // The frontend currently bootstraps from both cookies and local storage.
     return res.status(200).json({
       message: "Login successful",
       token,

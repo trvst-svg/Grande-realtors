@@ -9,6 +9,7 @@ export default function startAuctionStartNotifier() {
   let running = false;
 
   const run = async () => {
+    // Prevent overlapping scans when one poll takes longer than the interval.
     if (running) return;
     running = true;
     try {
@@ -66,6 +67,7 @@ export default function startAuctionStartNotifier() {
     }
   };
 
+  // Run once on boot so scheduled auctions do not wait for the first interval tick.
   run();
   setInterval(run, intervalMs);
 }
