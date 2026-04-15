@@ -6,7 +6,7 @@ import fileFilter from "./fileFilter.js";
 const uploadPropertyImages = multer({
   storage: createStorage(path.resolve("propertyuploads")),
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 },
 });
 
 export default uploadPropertyImages;

@@ -6,7 +6,7 @@ import fileFilter from "./fileFilter.js";
 const uploadCitizenship = multer({
   storage: createStorage(path.resolve("useruploads")),
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 30 * 1024 * 1024 },
 });
 
 export default uploadCitizenship;
