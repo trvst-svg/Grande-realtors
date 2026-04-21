@@ -206,24 +206,31 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="featured-grid">
-          {featuredItems.map((item) => (
-            <article key={item.id} className="home-card">
-              <div className="card-media">
-                <span className="badge">{item.badge || "Featured"}</span>
-                {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.title} />
-                ) : (
-                  <div className="media-block" />
-                )}
-              </div>
-              <div className="card-body">
-                <p className="price">{item.price}</p>
-                <h3>{item.title}</h3>
-                <p className="location">{item.location}</p>
-                <div className="meta">{item.meta}</div>
-              </div>
-            </article>
-          ))}
+          {featuredItems.map((item) => {
+            const to = item.id ? `/properties/${item.id}` : "/lands";
+            return (
+              <Link
+                key={item.id || item.title}
+                to={to}
+                className="home-card"
+              >
+                <div className="card-media">
+                  <span className="badge">{item.badge || "Featured"}</span>
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.title} />
+                  ) : (
+                    <div className="media-block" />
+                  )}
+                </div>
+                <div className="card-body">
+                  <p className="price">{item.price}</p>
+                  <h3>{item.title}</h3>
+                  <p className="location">{item.location}</p>
+                  <div className="meta">{item.meta}</div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>
