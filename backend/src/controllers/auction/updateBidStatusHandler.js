@@ -9,34 +9,8 @@ import { getPropertyById, updateProperty } from "../../models/property.model.js"
 import { getRoleIdByName, getUserById } from "../../models/user.model.js";
 import { createTransaction } from "../../models/transaction.model.js";
 import { createContract } from "../../models/contract.model.js";
-
-function buildContractText({ buyer, seller, property, bid }) {
-  const today = new Date().toLocaleDateString();
-  return `
-REAL ESTATE SALE AGREEMENT
-
-Date: ${today}
-
-Seller: ${seller.firstname} ${seller.lastname} (${seller.email})
-Buyer: ${buyer.firstname} ${buyer.lastname} (${buyer.email})
-
-Property:
-- Location: ${property.location}
-- Type: ${property.property_type}
-- Listing Type: ${property.listing_type || "N/A"}
-
-Agreed Price: NPR ${bid.bid_amount}
-
-Terms:
-1. Buyer agrees to purchase the property described above at the agreed price.
-2. Seller confirms ownership of the property and agrees to transfer it upon payment.
-3. Both parties acknowledge that the auction result is binding upon acceptance.
-
-Signatures:
-Seller: ______________________
-Buyer:  ______________________
-`;
-}
+import buildContractText from "../../utils/buildContractText.js";
+import { getSalesHandlerByPropertyId } from "../../models/property.model.js";
 
 export default async function updateBidStatusHandler(req, res, next) {
   try {
@@ -91,12 +65,14 @@ export default async function updateBidStatusHandler(req, res, next) {
       const property = await getPropertyById(auction.property_id);
       const buyer = await getUserById(bid.user_id);
       const seller = await getUserById(auction.owner_id);
+      const salesHandler = await getSalesHandlerByPropertyId(auction.property_id);
 
       if (property && buyer && seller) {
         const transaction = await createTransaction({
           property_id: property.id,
           buyer_id: buyer.id,
           seller_id: seller.id,
+          handler_id: salesHandler?.id || null,
           amount: bid.bid_amount,
           payment_method: "auction",
         });
@@ -106,6 +82,7 @@ export default async function updateBidStatusHandler(req, res, next) {
           seller,
           property,
           bid,
+          createdAt: new Date(),
         });
 
         await createContract({

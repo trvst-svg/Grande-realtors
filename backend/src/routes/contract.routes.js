@@ -1,10 +1,14 @@
 import { Router } from "express";
-import { getContractHandler } from "../controllers/contract.controller.js";
+import {
+  getContractByBidHandler,
+  getContractByTransactionHandler,
+} from "../controllers/contract.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 router.use(requireAuth);
-router.get("/:bidId", getContractHandler);
+router.get("/bid/:bidId", getContractByBidHandler);
+router.get("/transaction/:transactionId", getContractByTransactionHandler);
 
 export default router;

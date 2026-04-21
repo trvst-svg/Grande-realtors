@@ -41,10 +41,37 @@ export default function SalesHandlerProfilePage() {
           <h1>{fullName}</h1>
           <p>{handler.email}</p>
           <p>{handler.number || "Phone not available"}</p>
+          <p>
+            Rating {handler.avg_rating} from {handler.review_count || 0} reviews
+          </p>
         </div>
         <Link className="text-link" to="/sales-handlers">
           ← Back to all handlers
         </Link>
+      </section>
+
+      <section className="handlers-properties">
+        <div className="section-head">
+          <h2>Recent Feedback</h2>
+          <span>{profile.feedback?.length || 0} reviews</span>
+        </div>
+        <div className="handlers-property-grid handler-feedback-grid">
+          {profile.feedback?.length ? (
+            profile.feedback.map((item) => (
+              <div key={item.id} className="handler-property-card feedback-card">
+                <div className="property-body">
+                  <p className="price">{item.stars}/5</p>
+                  <h4>
+                    {item.buyer_firstname} {item.buyer_lastname}
+                  </h4>
+                  <p className="location">{item.review || "No written review."}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="muted">No feedback yet.</p>
+          )}
+        </div>
       </section>
 
       <section className="handlers-properties">

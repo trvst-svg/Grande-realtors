@@ -17,10 +17,12 @@ export default async function listSalesHandlers() {
        GROUP BY agent_id
      ) ap ON ap.agent_id = u.id
      LEFT JOIN (
-       SELECT agent_id, AVG(rating) AS avg_rating
-       FROM sales_handler_rating
-       GROUP BY agent_id
-     ) rating ON rating.agent_id = u.id
+       SELECT rated_user_id, AVG(stars) AS avg_rating
+       FROM ratings
+       WHERE role_type = 'handler'
+         AND is_hidden = FALSE
+       GROUP BY rated_user_id
+     ) rating ON rating.rated_user_id = u.id
      WHERE r.name = 'agent'
        AND u.approval_status = 'approved'
      ORDER BY assigned_count DESC, u.firstname ASC`

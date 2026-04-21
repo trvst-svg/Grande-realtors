@@ -3,7 +3,7 @@ import {
   getBidTicketByUserAuction,
   upsertBidTicket,
 } from "../../models/payment.model.js";
-import { getRoleIdByName, getUserById } from "../../models/user.model.js";
+import { getUserById } from "../../models/user.model.js";
 
 async function requestKhaltiPayment({
   return_url,
@@ -70,15 +70,6 @@ export default async function initiateBidTicket(req, res, next) {
 
     if (!userId) {
       return res.status(401).json({ error: "Authorization required" });
-    }
-
-    const buyerRoleId = await getRoleIdByName("buyer");
-    const userRoleId = await getRoleIdByName("user");
-    const isBuyer =
-      req.user?.role_id === buyerRoleId || req.user?.role_id === userRoleId;
-    // Bid tickets are limited to buyer-facing roles to keep auction ownership clean.
-    if (!isBuyer) {
-      return res.status(403).json({ error: "Only buyers can purchase bid tickets" });
     }
 
     if (!auctionId) {

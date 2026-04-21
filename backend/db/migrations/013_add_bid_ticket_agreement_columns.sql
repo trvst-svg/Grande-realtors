@@ -1,0 +1,3 @@
+ALTER TABLE bid_tickets
+  ADD COLUMN IF NOT EXISTS agreement_text TEXT,
+  ADD COLUMN IF NOT EXISTS agreement_accepted_at TIMESTAMP WITHOUT TIME ZONE;

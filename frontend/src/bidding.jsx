@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, fetchAuctions } from "./api.js";
+import { API_BASE_URL, fetchAuctions, updateAuctionStatus } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./bidding.css";
 
@@ -8,11 +8,13 @@ export default function BiddingPage() {
   const navigate = useNavigate();
   const [auctions, setAuctions] = useState([]);
   const [actionError, setActionError] = useState("");
+  const [endingAuctionId, setEndingAuctionId] = useState(null);
   const storedUser =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("gr_user") || "{}")
       : {};
   const currentUserId = storedUser?.id;
+  const currentUserRole = storedUser?.role;
 
   useEffect(() => {
     fetchAuctions().then(setAuctions).catch(() => setAuctions([]));
@@ -28,14 +30,11 @@ export default function BiddingPage() {
     navigate(`/bidding/${auctionId}`);
   };
 
-  const hero = auctions[0];
-  const rest = auctions.slice(1);
-  const heroImage = hero?.image ? `${API_BASE_URL}${hero.image}` : "";
-  const heroIsOwner = hero?.owner_id && hero.owner_id === currentUserId;
   const now = new Date();
 
   const getAuctionStatusText = (auction) => {
     if (!auction) return "";
+    if (auction.status === "closed") return "Ended";
     const startTime = auction.start_time ? new Date(auction.start_time) : null;
     const endTime = auction.end_time ? new Date(auction.end_time) : null;
     if (endTime && now > endTime) return "Ended";
@@ -45,6 +44,45 @@ export default function BiddingPage() {
     return "Live";
   };
 
+  const canViewAuction = (auction) => {
+    if (!auction) return false;
+    if (auction.status === "closed") {
+      if (auction.owner_id && auction.owner_id === currentUserId) return true;
+      return currentUserRole === "admin" || currentUserRole === "agent";
+    }
+    const endTime = auction.end_time ? new Date(auction.end_time) : null;
+    const hasEnded = Boolean(endTime && now > endTime);
+    if (!hasEnded) return true;
+    if (auction.owner_id && auction.owner_id === currentUserId) return true;
+    return currentUserRole === "admin" || currentUserRole === "agent";
+  };
+
+  const visibleAuctions = auctions.filter(canViewAuction);
+  const hero = visibleAuctions[0];
+  const rest = visibleAuctions.slice(1);
+  const heroImage = hero?.image ? `${API_BASE_URL}${hero.image}` : "";
+  const heroIsOwner = hero?.owner_id && hero.owner_id === currentUserId;
+  const isAdmin = currentUserRole === "admin";
+
+  const handleEndAuction = async (auctionId) => {
+    setActionError("");
+    setEndingAuctionId(auctionId);
+    try {
+      const data = await updateAuctionStatus(auctionId, "closed");
+      setAuctions((prev) =>
+        prev.map((auction) =>
+          auction.id === auctionId
+            ? { ...auction, status: data.auction?.status || "closed" }
+            : auction
+        )
+      );
+    } catch (err) {
+      setActionError(err.message || "Unable to end auction.");
+    } finally {
+      setEndingAuctionId(null);
+    }
+  };
+
   return (
     <div className="bidding-page">
       <Navbar showProfile />
@@ -52,7 +90,7 @@ export default function BiddingPage() {
       <section className="bidding-hero">
         <div className="hero-title">
           <h1>Live Auctions</h1>
-          <span className="live-pill">{auctions.length} Auctions Live</span>
+          <span className="live-pill">{visibleAuctions.length} Auctions Live</span>
         </div>
 
         {hero ? (
@@ -83,9 +121,26 @@ export default function BiddingPage() {
               >
                 {heroIsOwner ? "Your Listing" : "View Bid Details"}
               </button>
+              {isAdmin && hero.status !== "closed" ? (
+                <button
+                  type="button"
+                  className="danger-btn"
+                  onClick={() => handleEndAuction(hero.id)}
+                  disabled={endingAuctionId === hero.id}
+                >
+                  {endingAuctionId === hero.id ? "Ending..." : "End Auction"}
+                </button>
+              ) : null}
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="hero-card">
+            <div className="hero-info">
+              <h2>No live auctions right now</h2>
+              <p className="meta">Ended auctions are hidden for regular users.</p>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="active-auctions">
@@ -113,6 +168,16 @@ export default function BiddingPage() {
                 >
                   {isOwner ? "Your Listing" : "Bid Details"}
                 </button>
+                {isAdmin && auction.status !== "closed" ? (
+                  <button
+                    type="button"
+                    className="danger-btn"
+                    onClick={() => handleEndAuction(auction.id)}
+                    disabled={endingAuctionId === auction.id}
+                  >
+                    {endingAuctionId === auction.id ? "Ending..." : "End Auction"}
+                  </button>
+                ) : null}
               </div>
             </article>
           )})}

@@ -5,7 +5,6 @@ import {
   updateAuctionStatus,
 } from "../../models/auction.model.js";
 import { getBidTicketByUserAuction } from "../../models/payment.model.js";
-import { getRoleIdByName } from "../../models/user.model.js";
 import auctionEvents from "../../events/auctionEvents.js";
 
 export default async function createBidHandler(req, res, next) {
@@ -43,13 +42,6 @@ export default async function createBidHandler(req, res, next) {
     if (!userId) {
       return res.status(401).json({ error: "Authorization required" });
     }
-    const buyerRoleId = await getRoleIdByName("buyer");
-    const userRoleId = await getRoleIdByName("user");
-    const isBuyer =
-      req.user?.role_id === buyerRoleId || req.user?.role_id === userRoleId;
-    if (!isBuyer) {
-      return res.status(403).json({ error: "Only buyers can place bids" });
-    }
     if (!bid_amount) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -62,17 +54,29 @@ export default async function createBidHandler(req, res, next) {
     }
 
     const highestBid = await getHighestBid(auction.id);
+    const startingPrice = Number(auction.starting_price);
     const current = Number(highestBid || auction.starting_price);
     const bidValue = Number(bid_amount);
     if (!Number.isFinite(bidValue)) {
       return res.status(400).json({ error: "Bid amount must be a number" });
     }
-    const minIncrement = Number(process.env.BID_MIN_INCREMENT || 1);
-    const minBid = current + (Number.isFinite(minIncrement) ? minIncrement : 1);
-    if (bidValue < minBid) {
-      return res.status(400).json({
-        error: `Bid must be higher than current. Minimum bid is ${minBid}.`,
-      });
+    if (!Number.isFinite(startingPrice)) {
+      return res.status(500).json({ error: "Auction starting price is invalid" });
+    }
+
+    if (highestBid == null) {
+      if (bidValue <= startingPrice) {
+        return res.status(400).json({
+          error: `First bid must be higher than the asking price of ${startingPrice}.`,
+        });
+      }
+    } else {
+      const minBid = Math.ceil(current * 1.01);
+      if (bidValue < minBid) {
+        return res.status(400).json({
+          error: `Bid must be at least 1% higher than the current highest bid. Minimum bid is ${minBid}.`,
+        });
+      }
     }
 
     const bid = await createBid({

@@ -30,6 +30,19 @@ export function buildRefreshCookieOptions() {
     httpOnly: true,
     sameSite: isProd ? "none" : "lax",
     secure: isProd,
+    path: "/",
     maxAge: getRefreshTokenTtlMs(),
+  };
+}
+
+export function buildRefreshCookieClearOptions() {
+  const isProd = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
+    path: "/",
+    expires: new Date(0),
+    maxAge: 0,
   };
 }

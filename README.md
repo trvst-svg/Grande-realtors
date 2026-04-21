@@ -1,15 +1,15 @@
 # Grande Realtors
 
-Grande Realtors is a full-stack real estate marketplace built for property discovery, agent-assisted sales, and auction-based bidding. The platform combines listing management, role-aware dashboards, buyer inquiries, favorites, messaging, contracts, ratings, and Khalti-powered bid-ticket payments in a single codebase.
+Grande Realtors is a full-stack real estate marketplace built for property discovery, agent-assisted sales, and auction-based bidding. The platform combines listing management, role-aware dashboards, buyer and seller onboarding, property inquiries, favorites, contracts, ratings, and Khalti-powered bid-ticket payments in a single codebase.
 
 ## Highlights
 
 - React + Vite frontend for the customer, agent, and admin experiences
 - Express API backed by PostgreSQL
 - JWT access-token authentication with refresh-token rotation
-- Admin approval workflow for new user registrations and property verification
+- Buyer and seller signup with citizenship upload plus admin approval workflow
 - Auction lifecycle support, including bid-ticket purchase through Khalti sandbox
-- Messaging, contracts, seller ratings, and property inquiry flows
+- Bid review controls, contracts, ratings, and property inquiry flows
 
 ## Architecture
 
@@ -26,16 +26,17 @@ The frontend lives in `frontend/` and is responsible for:
 
 The backend lives in `backend/` and provides:
 
-- REST endpoints for auth, properties, auctions, dashboards, messaging, ratings, and payments
+- REST endpoints for auth, properties, auctions, dashboards, ratings, and payments
 - PostgreSQL data access through model modules
 - upload handling for user and property images
 - background polling to open scheduled auctions and trigger notification emails
+- contract generation for accepted auction bids and direct handled sales
 
 ### Database
 
-The canonical database definition is `backend/db/schema.sql`.
+The canonical database definition is `backend/db/seeds/schema.sql`.
 
-Use `schema.sql` for fresh local setup and for aligning an older local database to the current application shape. The files under `backend/db/migrations/` are best treated as historical reference; the application does not execute them automatically during startup.
+Use `backend/db/seeds/schema.sql` for fresh local setup and for aligning an older local database to the current application shape. The files under `backend/db/migrations/` are historical reference SQL and are not executed automatically during startup.
 
 ## Repository Structure
 
@@ -106,10 +107,16 @@ npm install
 ### 2. Create the database schema
 
 ```bash
-psql -d <your_database_name> -f backend/db/schema.sql
+psql -d <your_database_name> -f backend/db/seeds/schema.sql
 ```
 
 Optional seed data is available under `backend/db/seeds/`.
+
+If you already have an older local database, apply the latest schema changes manually before running the app. The current direct-sale contract update is stored in:
+
+```bash
+psql -d <your_database_name> -f backend/db/migrations/016_allow_direct_sale_contracts.sql
+```
 
 ### 3. Start the backend
 
@@ -168,5 +175,19 @@ Common sandbox test values:
 
 - PostgreSQL must be reachable before the backend starts.
 - Bid placement is enforced server-side. Users cannot bid until their ticket status is `paid`.
+- Auction owners, admins, and agents can accept or reject bids from the auction detail screen.
+- Accepted auction bids generate a contract automatically.
+- Direct handled sales from the agent workflow also generate a contract automatically.
+- Contracts can be opened from the user dashboard by transaction, and accepted auction contracts can also be opened from the auction detail screen.
 - The auction notifier runs in the backend process and periodically opens scheduled auctions.
 - Email features degrade gracefully when SMTP is not configured, but related notifications will not be sent.
+
+## Feature Coverage
+
+- Signup and authentication: buyer/seller signup, citizenship upload, login, refresh-token rotation, password reset
+- Property flow: create, edit, delete, upload images, browse, search, filter, bookmark, and inquire
+- Admin and sales handler flow: approve users, approve properties, assign handlers, track dashboard activity, close listings and auctions
+- Auction flow: create auctions, buy Khalti bid tickets, accept terms, place live bids, stream updates, review bids, accept or reject bids
+- Contract and transaction flow: generate contracts for accepted auction bids and direct handled sales, then retrieve them by bid or transaction
+- Ratings flow: buyers can rate sellers and handlers after completed transactions
+- Utility flow: EMI calculator, sales handler directory, and responsive layouts for public and dashboard screens

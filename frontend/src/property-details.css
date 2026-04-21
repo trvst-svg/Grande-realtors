@@ -219,6 +219,44 @@
   line-height: 1.5;
 }
 
+.details-feedback-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.feedback-card {
+  background: #f7f2ea;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.feedback-card h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.feedback-item + .feedback-item {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e6dccf;
+}
+
+.feedback-item strong {
+  display: block;
+  color: #1f1f1f;
+}
+
+.feedback-item p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #5f574c;
+}
+
+.feedback-item span {
+  font-size: 12px;
+  color: #6d655b;
+}
+
 .details-specs {
   padding: 10px 70px 50px;
 }

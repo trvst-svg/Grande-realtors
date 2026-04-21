@@ -40,7 +40,6 @@ export default function EditPropertyPage() {
   const [form, setForm] = useState({
     property_type: "",
     property_type_id: null,
-    listing_purpose: "sale",
     listing_type: "residential",
     location: "",
     price: "",
@@ -65,9 +64,6 @@ export default function EditPropertyPage() {
   }, []);
 
   const hydrateForm = (data) => {
-    const listingPurpose = data.listing_purpose
-      ? String(data.listing_purpose).toLowerCase()
-      : "sale";
     const listingType = data.listing_type
       ? String(data.listing_type).toLowerCase()
       : "residential";
@@ -79,7 +75,6 @@ export default function EditPropertyPage() {
     setForm({
       property_type: data.property_type || "",
       property_type_id: data.property_type_id || null,
-      listing_purpose: listingPurpose,
       listing_type: listingType,
       location: data.location || "",
       price: data.price ?? "",
@@ -187,7 +182,6 @@ export default function EditPropertyPage() {
         description: form.description,
         price: form.price,
         sale_status: form.sale_status,
-        listing_purpose: form.listing_purpose,
         listing_type: form.listing_type,
       };
 
@@ -276,18 +270,6 @@ export default function EditPropertyPage() {
               <input id="property_type" value={form.property_type} readOnly />
             </div>
             <div>
-              <label htmlFor="listing_purpose">Purpose</label>
-              <select
-                id="listing_purpose"
-                name="listing_purpose"
-                value={form.listing_purpose}
-                onChange={handleChange}
-              >
-                <option value="sale">Sale</option>
-                <option value="bidding">Bidding</option>
-              </select>
-            </div>
-            <div>
               <label htmlFor="listing_type">Type</label>
               <select
                 id="listing_type"
@@ -336,6 +318,10 @@ export default function EditPropertyPage() {
               />
             </div>
           </div>
+
+          <p className="muted">
+            Properties stay listed for sale here. To move a property into bidding, create an auction separately.
+          </p>
 
           <label htmlFor="description">Description</label>
           <textarea

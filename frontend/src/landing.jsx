@@ -5,10 +5,11 @@ import { API_BASE_URL, fetchLandingData, fetchProperties } from "./api.js";
 import "./landing.css";
 
 const sliderImages = [
-  // Add your image URLs here, for example:
-  // "/images/slide-1.jpg",
-  // "/images/slide-2.jpg",
-  // "/images/slide-3.jpg",
+  "/image1.png",
+  "/image2.png",
+  "/image3.png",
+  "/image4.png",
+  "/image5.png",
 ];
 
 const FALLBACK_FOOTER = {
@@ -100,7 +101,7 @@ export default function LandingPage() {
                   <img src={src} alt={`Featured property ${index + 1}`} />
                 ) : (
                   <div className="slide-placeholder">
-                    <span>Slider imagees</span>
+                    <span>Slider images</span>
                   </div>
                 )}
               </div>

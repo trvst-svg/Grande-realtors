@@ -20,11 +20,33 @@ export default async function getUserProfile(userId) {
   );
 
   const myProperties = await pool.query(
-    `SELECT p.id, p.location, p.price, pt.name AS property_type
+    `SELECT p.id,
+            p.location,
+            p.price,
+            p.sale_status,
+            pt.name AS property_type,
+            a.id AS auction_id,
+            a.status AS auction_status
      FROM properties p
      JOIN property_types pt ON pt.id = p.property_type_id
+     LEFT JOIN auctions a ON a.property_id = p.id
      WHERE p.owner_id = $1
      ORDER BY p.listed_date DESC
+     LIMIT 4`,
+    [userId]
+  );
+
+  const favoriteProperties = await pool.query(
+    `SELECT p.id,
+            p.location,
+            p.price,
+            pt.name AS property_type
+     FROM favorites f
+     JOIN properties p ON p.id = f.property_id
+     JOIN property_types pt ON pt.id = p.property_type_id
+     WHERE f.user_id = $1
+       AND COALESCE(p.sale_status, 'available') = 'available'
+     ORDER BY f.added_at DESC
      LIMIT 4`,
     [userId]
   );
@@ -33,5 +55,6 @@ export default async function getUserProfile(userId) {
     user: user.rows[0],
     stats: stats.rows[0],
     myProperties: myProperties.rows,
+    favoriteProperties: favoriteProperties.rows,
   };
 }

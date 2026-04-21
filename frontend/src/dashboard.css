@@ -33,6 +33,12 @@
   text-decoration: none;
 }
 
+.agent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .dashboard-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -150,6 +156,18 @@
 .mini-action.secondary {
   background: #c9a24d;
   color: #111;
+}
+
+.mini-action.danger {
+  border: none;
+  background: #7a2e2e;
+  color: #fff;
+  cursor: pointer;
+}
+
+.mini-action.danger:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 
 .auction-form {
@@ -354,15 +372,29 @@
 }
 
 .admin-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
   color: #645c52;
   text-decoration: none;
   font-size: 13px;
-  padding-bottom: 2px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: rgba(31, 31, 31, 0.04);
 }
 
 .admin-nav a.active {
   color: #1f1f1f;
-  border-bottom: 2px solid #c9a24d;
+  background: rgba(201, 162, 77, 0.16);
+  border-color: rgba(201, 162, 77, 0.55);
+}
+
+.admin-nav a:hover {
+  color: #1f1f1f;
+  background: rgba(201, 162, 77, 0.1);
+  border-color: rgba(201, 162, 77, 0.4);
 }
 
 .admin-actions {
@@ -375,6 +407,7 @@
   border: 1px solid #c9a24d;
   background: transparent;
   color: #6d5521;
+  min-height: 40px;
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 13px;
@@ -582,6 +615,7 @@
 .property-request-actions-inline {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .property-request-actions-inline button {
@@ -590,6 +624,122 @@
   border: none;
   font-weight: 600;
   cursor: pointer;
+}
+
+.property-management-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  align-items: center;
+}
+
+.action-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sale-complete-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  background: #fbf8f3;
+  border: 1px solid #efe7dd;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.sale-complete-form label {
+  font-size: 12px;
+  color: #6d655b;
+}
+
+.sale-complete-form select,
+.sale-complete-form input,
+.rating-modal textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #d7cdbf;
+  padding: 10px;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.agreement-text {
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border-radius: 12px;
+  border: 1px solid #e4d9cb;
+  background: #faf7f2;
+  padding: 14px;
+  font-family: "Source Code Pro", "SFMono-Regular", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.transaction-row {
+  align-items: flex-start;
+}
+
+.transaction-actions {
+  align-items: flex-end;
+}
+
+.rating-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.rating-modal {
+  width: min(100%, 520px);
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.18);
+  display: grid;
+  gap: 12px;
+}
+
+.rating-modal h3 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 8px;
+}
+
+.rating-stars button {
+  border: none;
+  background: transparent;
+  color: #c5b9aa;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.rating-stars button.active {
+  color: #c9a24d;
+}
+
+.rating-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .handler-label {

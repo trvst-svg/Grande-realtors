@@ -16,8 +16,10 @@ import AdminUsers from "./admin-users.jsx";
 import AdminProperties from "./admin-properties.jsx";
 import AgentDashboard from "./agent-dashboard.jsx";
 import AgentProperties from "./agent-properties.jsx";
+import AgentAssignedProperties from "./agent-assigned-properties.jsx";
 import UserDashboard from "./user-dashboard.jsx";
 import AuctionBidPage from "./auction-bid.jsx";
+import BidTicketTermsPage from "./bid-ticket-terms.jsx";
 import ForgotPasswordPage from "./forgot-password.jsx";
 import ResetPasswordPage from "./reset-password.jsx";
 import PropertyDetailsPage from "./property-details.jsx";
@@ -38,8 +40,10 @@ export default function App() {
       <Route path="/lands" element={blockAdmin(<LandsPage />)} />
       <Route path="/houses" element={blockAdmin(<HousesPage />)} />
       <Route path="/bidding" element={blockAdmin(<BiddingPage />)} />
+      <Route path="/bidding/:id/terms" element={blockAdmin(<BidTicketTermsPage />)} />
       <Route path="/bidding/:id" element={blockAdmin(<AuctionBidPage />)} />
       <Route path="/emi" element={blockAdmin(<EmiCalculatorPage />)} />
+      <Route path="/messages" element={blockAdmin(<MessagesPage />)} />
       <Route path="/properties/:id" element={blockAdmin(<PropertyDetailsPage />)} />
       <Route
         path="/properties/:id/edit"
@@ -47,7 +51,6 @@ export default function App() {
       />
       <Route path="/sales-handlers" element={blockAdmin(<SalesHandlersPage />)} />
       <Route path="/sales-handlers/:id" element={blockAdmin(<SalesHandlerProfilePage />)} />
-      <Route path="/messages" element={blockAdmin(<MessagesPage />)} />
       <Route path="/contact" element={blockAdmin(<ContactPage />)} />
       <Route path="/profile" element={blockAdmin(<ProfilePage />)} />
       <Route path="/list-property" element={blockAdmin(<ListPropertyPage />)} />
@@ -58,10 +61,14 @@ export default function App() {
       <Route path="/dashboard/admin" element={<AdminDashboard />} />
       <Route path="/dashboard/admin/users" element={<AdminUsers />} />
       <Route path="/dashboard/admin/properties" element={<AdminProperties />} />
-      <Route path="/dashboard/agent" element={blockAdmin(<AgentDashboard />)} />
+      <Route path="/dashboard/agent" element={<AgentDashboard />} />
       <Route
         path="/dashboard/agent/properties"
-        element={blockAdmin(<AgentProperties />)}
+        element={<AgentProperties />}
+      />
+      <Route
+        path="/dashboard/agent/assigned-properties"
+        element={<AgentAssignedProperties />}
       />
       <Route path="/dashboard/user" element={blockAdmin(<UserDashboard />)} />
       <Route path="/signup" element={blockAdmin(<SignupPage />)} />

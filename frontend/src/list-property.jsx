@@ -25,7 +25,6 @@ export default function ListPropertyPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     property_type: "land",
-    listing_purpose: "sale",
     listing_type: "residential",
     location: "",
     price: "",
@@ -41,7 +40,6 @@ export default function ListPropertyPage() {
   const user = useMemo(() => {
     return JSON.parse(localStorage.getItem("gr_user") || "{}");
   }, []);
-  const isSeller = user.role === "seller" || user.role === "user";
 
   useEffect(() => {
     const token = localStorage.getItem("gr_token");
@@ -96,7 +94,6 @@ export default function ListPropertyPage() {
     try {
       const payload = {
         property_type: form.property_type,
-        listing_purpose: form.listing_purpose,
         listing_type: form.listing_type,
         location: form.location,
         price: form.price,
@@ -124,7 +121,6 @@ export default function ListPropertyPage() {
       });
       setForm({
         property_type: "land",
-        listing_purpose: "sale",
         listing_type: "residential",
         location: "",
         price: "",
@@ -154,11 +150,6 @@ export default function ListPropertyPage() {
       </section>
 
       <form className="list-form" onSubmit={handleSubmit}>
-        {!isSeller ? (
-          <p className="status error">
-            Only sellers can list properties. Please create a seller account.
-          </p>
-        ) : null}
         <section className="form-card">
           <h2>Contact Details</h2>
           <p className="muted">Based on your profile information.</p>
@@ -198,18 +189,6 @@ export default function ListPropertyPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="listing_purpose">Purpose</label>
-              <select
-                id="listing_purpose"
-                name="listing_purpose"
-                value={form.listing_purpose}
-                onChange={handleChange}
-              >
-                <option value="sale">Sale</option>
-                <option value="bidding">Bidding</option>
-              </select>
-            </div>
-            <div>
               <label htmlFor="listing_type">Type</label>
               <select
                 id="listing_type"
@@ -245,6 +224,10 @@ export default function ListPropertyPage() {
               />
             </div>
           </div>
+
+          <p className="muted">
+            New properties are listed for sale by default. You can create an auction later from your property controls.
+          </p>
 
           <label htmlFor="description">Description</label>
           <textarea
@@ -363,8 +346,33 @@ export default function ListPropertyPage() {
 
         <section className="form-card">
           <h2>Images</h2>
-          <input type="file" accept="image/*" multiple onChange={handleFiles} />
+          <div className="file-picker">
+            <label className="file-picker-btn" htmlFor="property-images">
+              Choose Images
+            </label>
+            <input
+              id="property-images"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFiles}
+            />
+            <p className="file-picker-status">
+              {images.length
+                ? `${images.length} file${images.length > 1 ? "s" : ""} selected`
+                : "No files selected"}
+            </p>
+          </div>
           <p className="muted">Upload up to 10 images.</p>
+          {images.length ? (
+            <div className="selected-files">
+              {images.map((file, index) => (
+                <span key={`${file.name}-${index}`} className="selected-file">
+                  {file.name}
+                </span>
+              ))}
+            </div>
+          ) : null}
           {imageStatus.message ? (
             <p className={`status ${imageStatus.type}`}>{imageStatus.message}</p>
           ) : null}
@@ -374,7 +382,7 @@ export default function ListPropertyPage() {
           <p className={`status ${status.type}`}>{status.message}</p>
         ) : null}
 
-        <button type="submit" disabled={loading || !isSeller}>
+        <button type="submit" disabled={loading}>
           {loading ? "Submitting..." : "Submit for Verification"}
         </button>
       </form>

@@ -10,6 +10,7 @@ export default async function signup(req, res, next) {
     const email = req.body.email?.trim();
     const password = req.body.password;
     const number = req.body.number?.trim();
+    const requestedRole = "user";
     const files = req.files || {};
     const citizenshipFront = files.citizenshipFront?.[0];
     const citizenshipBack = files.citizenshipBack?.[0];
@@ -40,8 +41,12 @@ export default async function signup(req, res, next) {
     }
 
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);  
-    const roleId = 1
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const roleId = await getRoleIdByName(requestedRole);
+    if (!roleId) {
+      await cleanupUploads(uploadPaths);
+      return res.status(500).json({ error: "User role is not configured" });
+    }
 
     const user = await createUser({
       firstname,

@@ -1,3 +1,3 @@
 export { default as listMessageThreadsHandler } from "./message/listMessageThreadsHandler.js";
-export { default as listMessagesHandler } from "./message/listMessagesHandler.js";
-export { default as sendMessageHandler } from "./message/sendMessageHandler.js";
+export { default as getInquiryThreadHandler } from "./message/getInquiryThreadHandler.js";
+export { default as createInquiryMessageHandler } from "./message/createInquiryMessageHandler.js";

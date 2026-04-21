@@ -185,6 +185,36 @@
   color: #111;
 }
 
+.mini-link.auction-link {
+  background: #1f4b43;
+  color: #fff;
+}
+
+.danger-button {
+  border: none;
+  background: #7a2e2e;
+  color: #fff;
+  cursor: pointer;
+}
+
+.danger-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.status {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.status.success {
+  color: #1f4b43;
+}
+
+.status.error {
+  color: #7a2e2e;
+}
+
 .security-item {
   display: flex;
   justify-content: space-between;

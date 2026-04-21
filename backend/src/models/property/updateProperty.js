@@ -9,9 +9,7 @@ export default async function updateProperty(id, fields) {
   values.push(id);
 
   const result = await pool.query(
-    `UPDATE properties SET ${setClause}, updated_at = NOW() WHERE id = $$${
-      keys.length + 1
-    } RETURNING *`,
+    `UPDATE properties SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`,
     values
   );
   return result.rows[0];

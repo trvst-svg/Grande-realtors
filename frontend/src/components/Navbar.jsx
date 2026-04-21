@@ -7,7 +7,6 @@ const navItems = [
   { label: "Lands", to: "/lands" },
   { label: "Houses", to: "/houses" },
   { label: "Bidding", to: "/bidding" },
-  { label: "Messages", to: "/messages" },
   { label: "Contact", to: "/contact" },
   { label: "EMI Calculator", to: "/emi" },
 ];
@@ -15,11 +14,24 @@ const navItems = [
 export default function Navbar({
   showAuthActions = false,
   showProfile = false,
-  profileInitials = "JD",
+  profileInitials,
 }) {
   const navigate = useNavigate();
   const hasToken =
     typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
+  const storedUser =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("gr_user") || "{}")
+      : {};
+
+  const derivedInitials =
+    profileInitials ||
+    `${storedUser.firstname?.[0] || ""}${storedUser.lastname?.[0] || ""}`.toUpperCase() ||
+    storedUser.email?.[0]?.toUpperCase() ||
+    "U";
+  const navLinks = hasToken
+    ? [...navItems, { label: "Messages", to: "/messages" }]
+    : navItems;
 
   const handleLogout = async () => {
     await logoutUser();
@@ -32,7 +44,7 @@ export default function Navbar({
         Grande.
       </Link>
       <nav>
-        {navItems.map((item) => (
+        {navLinks.map((item) => (
           <NavLink
             key={item.label}
             to={item.to}
@@ -65,7 +77,7 @@ export default function Navbar({
         ) : null}
         {showProfile && hasToken ? (
           <Link className="profile-chip" to="/profile">
-            {profileInitials}
+            {derivedInitials}
           </Link>
         ) : null}
       </div>

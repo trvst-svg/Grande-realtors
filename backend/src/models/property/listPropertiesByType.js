@@ -24,6 +24,7 @@ export default async function listPropertiesByType(typeName) {
      ) pvr ON true
      WHERE pt.name = $1
        AND (pvr.request_status IS NULL OR pvr.request_status = 'approved')
+       AND COALESCE(p.sale_status, 'available') = 'available'
      ORDER BY p.listed_date DESC`,
     [typeName]
   );

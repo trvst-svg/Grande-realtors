@@ -52,7 +52,8 @@ export default function AgentProperties() {
     setActionStatus({ type: "", message: "" });
     setActioningId(requestId);
     try {
-      await approvePropertyRequest(requestId);
+      const stored = JSON.parse(localStorage.getItem("gr_user") || "{}");
+      await approvePropertyRequest(requestId, stored.id);
       setRequests((prev) => prev.filter((item) => item.id !== requestId));
       setActionStatus({ type: "success", message: "Property approved." });
     } catch (err) {

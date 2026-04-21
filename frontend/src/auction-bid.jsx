@@ -7,9 +7,7 @@ import {
   fetchBidTicket,
   fetchContract,
   fetchMyBid,
-  initiateBidTicket,
   placeBid,
-  submitSellerRating,
   updateBidStatus,
 } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
@@ -33,11 +31,11 @@ export default function AuctionBidPage() {
   const [bidsStatus, setBidsStatus] = useState({ type: "", message: "" });
   const [myBid, setMyBid] = useState(null);
   const [contract, setContract] = useState(null);
-  const [rating, setRating] = useState({ value: 5, review: "" });
-  const [ratingStatus, setRatingStatus] = useState({ type: "", message: "" });
+  const [contractLanguage, setContractLanguage] = useState("en");
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [reviewingBidId, setReviewingBidId] = useState(null);
   const hasToken =
     typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
   const storedUser =
@@ -45,6 +43,7 @@ export default function AuctionBidPage() {
       ? JSON.parse(localStorage.getItem("gr_user") || "{}")
       : {};
   const currentUserId = storedUser?.id;
+  const currentUserRole = storedUser?.role;
 
   useEffect(() => {
     let mounted = true;
@@ -79,8 +78,11 @@ export default function AuctionBidPage() {
       setMyBid(null);
       return;
     }
-    const ownerCheck = auction.owner_id && auction.owner_id === currentUserId;
-    if (ownerCheck) {
+    const canReviewBids =
+      (auction.owner_id && auction.owner_id === currentUserId) ||
+      currentUserRole === "admin" ||
+      currentUserRole === "agent";
+    if (canReviewBids) {
       fetchAuctionBids(auction.id)
         .then(setBids)
         .catch((err) =>
@@ -91,7 +93,7 @@ export default function AuctionBidPage() {
         .then(setMyBid)
         .catch(() => setMyBid(null));
     }
-  }, [auction?.id, auction?.owner_id, currentUserId, hasToken]);
+  }, [auction?.id, auction?.owner_id, currentUserId, currentUserRole, hasToken]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -106,6 +108,7 @@ export default function AuctionBidPage() {
   useEffect(() => {
     if (!myBid?.id || myBid.status !== "accepted") {
       setContract(null);
+      setContractLanguage("en");
       return;
     }
     fetchContract(myBid.id)
@@ -113,10 +116,29 @@ export default function AuctionBidPage() {
       .catch(() => setContract(null));
   }, [myBid]);
 
-  const minBid = useMemo(() => {
-    if (!auction) return 0;
-    const current = Number(auction.current_price || auction.starting_price || 0);
-    return current + 1;
+  const biddingRule = useMemo(() => {
+    if (!auction) {
+      return {
+        hasExistingBids: false,
+        minBid: 0,
+        helperText: "",
+        placeholder: "",
+      };
+    }
+    const startingPrice = Number(auction.starting_price || 0);
+    const currentPrice = Number(auction.current_price || auction.starting_price || 0);
+    const hasExistingBids = currentPrice > startingPrice;
+
+    return {
+      hasExistingBids,
+      minBid: hasExistingBids ? Math.ceil(currentPrice * 1.01) : startingPrice,
+      helperText: hasExistingBids
+        ? `Bids must be at least NPR ${Math.ceil(currentPrice * 1.01)} (1% above the current highest bid).`
+        : `First bid must be higher than the asking price of NPR ${startingPrice}.`,
+      placeholder: hasExistingBids
+        ? `Minimum ${Math.ceil(currentPrice * 1.01)}`
+        : `Above ${startingPrice}`,
+    };
   }, [auction]);
 
   useEffect(() => {
@@ -157,16 +179,7 @@ export default function AuctionBidPage() {
     }
     setPaying(true);
     try {
-      const data = await initiateBidTicket(id);
-      if (data.status === "paid") {
-        setTicket({ status: "paid", amount: data.amount });
-      } else if (data.payment?.payment_url) {
-        window.location.href = data.payment.payment_url;
-      } else {
-        setStatus({ type: "error", message: "Unable to initiate payment." });
-      }
-    } catch (err) {
-      setStatus({ type: "error", message: err.message });
+      navigate(`/bidding/${id}/terms`);
     } finally {
       setPaying(false);
     }
@@ -199,10 +212,18 @@ export default function AuctionBidPage() {
       return;
     }
 
-    if (value < minBid) {
+    if (!biddingRule.hasExistingBids && value <= Number(auction.starting_price)) {
       setStatus({
         type: "error",
-        message: `Minimum bid is ${minBid}.`,
+        message: `First bid must be higher than the asking price of ${auction.starting_price}.`,
+      });
+      return;
+    }
+
+    if (biddingRule.hasExistingBids && value < biddingRule.minBid) {
+      setStatus({
+        type: "error",
+        message: `Minimum bid is ${biddingRule.minBid}.`,
       });
       return;
     }
@@ -218,6 +239,34 @@ export default function AuctionBidPage() {
       setStatus({ type: "error", message: err.message });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const reloadAuctionContext = async () => {
+    const [auctionData, bidItems] = await Promise.all([
+      fetchAuction(id),
+      fetchAuctionBids(id),
+    ]);
+    setAuction(auctionData);
+    setBids(bidItems);
+  };
+
+  const handleReviewBid = async (bidId, nextStatus) => {
+    setBidsStatus({ type: "", message: "" });
+    setReviewingBidId(bidId);
+    try {
+      const data = await updateBidStatus(id, bidId, nextStatus);
+      await reloadAuctionContext();
+      setBidsStatus({
+        type: "success",
+        message:
+          data.message ||
+          `Bid ${nextStatus === "accepted" ? "accepted" : "rejected"}.`,
+      });
+    } catch (err) {
+      setBidsStatus({ type: "error", message: err.message });
+    } finally {
+      setReviewingBidId(null);
     }
   };
 
@@ -239,6 +288,13 @@ export default function AuctionBidPage() {
   const now = new Date();
   const hasStarted = !startTime || now >= startTime;
   const hasEnded = Boolean(endTime && now > endTime);
+  const canViewEndedAuction =
+    !hasEnded ||
+    (auction?.owner_id && auction.owner_id === currentUserId) ||
+    currentUserRole === "admin" ||
+    currentUserRole === "agent";
+  const isPrivilegedViewer =
+    currentUserRole === "admin" || currentUserRole === "agent";
   const statusLabel = hasEnded
     ? "Auction Ended"
     : hasStarted
@@ -250,6 +306,31 @@ export default function AuctionBidPage() {
       : ticket.status === "loading"
       ? "Checking..."
       : "Not Paid";
+  const canReviewBids =
+    (auction?.owner_id && auction.owner_id === currentUserId) ||
+    currentUserRole === "admin" ||
+    currentUserRole === "agent";
+  const contractText =
+    contract?.contract_texts?.[contractLanguage] || contract?.contract_text || "";
+
+  if (!canViewEndedAuction) {
+    return (
+      <div className="bidding-page">
+        <Navbar showProfile />
+        <section className="bidding-hero">
+          <div className="hero-card">
+            <div className="hero-info">
+              <h2>Auction unavailable</h2>
+              <p className="meta">Ended auctions are not visible to regular users.</p>
+              <button type="button" onClick={() => navigate("/bidding")}>
+                Back to Live Auctions
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="bidding-page">
@@ -257,7 +338,7 @@ export default function AuctionBidPage() {
 
       <section className="bidding-hero">
         <div className="hero-title">
-          <h1>Place Your Bid</h1>
+          <h1>{isPrivilegedViewer ? "Live Auction" : "Place Your Bid"}</h1>
           <span className="live-pill">{statusLabel}</span>
         </div>
 
@@ -291,7 +372,11 @@ export default function AuctionBidPage() {
             <h3>NPR {auction.current_price}</h3>
             <div className="bid-meta">
               <span>Minimum Bid</span>
-              <strong>NPR {minBid}</strong>
+              <strong>
+                {biddingRule.hasExistingBids
+                  ? `NPR ${biddingRule.minBid}`
+                  : `Above NPR ${auction.starting_price}`}
+              </strong>
             </div>
             <div className="bid-meta">
               <span>Ticket Fee</span>
@@ -355,76 +440,196 @@ export default function AuctionBidPage() {
       </section>
 
       <section className="bid-actions">
-        <div className="panel">
-          <h2>Bid Ticket</h2>
-          <p className="muted">
-            Pay the ticket fee once to unlock bidding for this auction.
-          </p>
-          <div className="ticket-status">
-            <span>Status</span>
-            <strong>{ticketLabel}</strong>
-          </div>
-          <button
-            type="button"
-            onClick={handlePayTicket}
-            disabled={paying || ticket.status === "paid" || isOwner || hasEnded}
-          >
-            {ticket.status === "paid"
-              ? "Ticket Paid"
-              : paying
-              ? "Redirecting..."
-              : isOwner
-              ? "Owner Access"
-              : hasEnded
-              ? "Auction Ended"
-              : "Pay Ticket Fee"}
-          </button>
-          {!hasToken ? (
-            <p className="status warning">Sign in to purchase a bid ticket.</p>
-          ) : null}
-        </div>
+        {!isPrivilegedViewer ? (
+          <>
+            <div className="panel">
+              <h2>Bid Ticket</h2>
+              <p className="muted">
+                Pay the ticket fee once to unlock bidding for this auction.
+              </p>
+              <div className="ticket-status">
+                <span>Status</span>
+                <strong>{ticketLabel}</strong>
+              </div>
+              <button
+                type="button"
+                onClick={handlePayTicket}
+                disabled={paying || ticket.status === "paid" || isOwner || hasEnded}
+              >
+                {ticket.status === "paid"
+                  ? "Ticket Paid"
+                  : paying
+                  ? "Redirecting..."
+                  : isOwner
+                  ? "Owner Access"
+                  : hasEnded
+                  ? "Auction Ended"
+                  : "Pay Ticket Fee"}
+              </button>
+              {!hasToken ? (
+                <p className="status warning">Sign in to purchase a bid ticket.</p>
+              ) : null}
+            </div>
 
-        <div className="panel">
-          <h2>Enter Your Bid</h2>
-          <p className="muted">Bids must be at least NPR {minBid}.</p>
-          <form onSubmit={handleSubmitBid}>
-            <label htmlFor="bidAmount">Bid Amount (NPR)</label>
-            <input
-              id="bidAmount"
-              type="number"
-              min={minBid}
-              value={bidAmount}
-              onChange={(event) => setBidAmount(event.target.value)}
-              placeholder={`Minimum ${minBid}`}
-              required
-            />
-            {status.message ? (
-              <p className={`status ${status.type}`}>{status.message}</p>
-            ) : null}
-            <button
-              type="submit"
-              disabled={
-                submitting ||
-                ticket.status !== "paid" ||
-                isOwner ||
-                !hasStarted ||
-                hasEnded
-              }
-            >
-              {submitting
-                ? "Placing Bid..."
-                : isOwner
-                ? "Owner Access"
-                : ticket.status !== "paid"
-                ? "Pay Ticket to Bid"
-                : !hasStarted
-                ? "Auction Not Started"
-                : hasEnded
-                ? "Auction Ended"
-                : "Submit Bid"}
-            </button>
-          </form>
-        </div>
+            <div className="panel">
+              <h2>Enter Your Bid</h2>
+              <p className="muted">{biddingRule.helperText}</p>
+              <form onSubmit={handleSubmitBid}>
+                <label htmlFor="bidAmount">Bid Amount (NPR)</label>
+                <input
+                  id="bidAmount"
+                  type="number"
+                  min={biddingRule.minBid}
+                  step="0.01"
+                  value={bidAmount}
+                  onChange={(event) => setBidAmount(event.target.value)}
+                  placeholder={biddingRule.placeholder}
+                  required
+                />
+                {status.message ? (
+                  <p className={`status ${status.type}`}>{status.message}</p>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={
+                    submitting ||
+                    ticket.status !== "paid" ||
+                    isOwner ||
+                    !hasStarted ||
+                    hasEnded
+                  }
+                >
+                  {submitting
+                    ? "Placing Bid..."
+                    : isOwner
+                    ? "Owner Access"
+                    : ticket.status !== "paid"
+                    ? "Pay Ticket to Bid"
+                    : !hasStarted
+                    ? "Auction Not Started"
+                    : hasEnded
+                    ? "Auction Ended"
+                    : "Submit Bid"}
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="panel">
+            <h2>Auction Monitor</h2>
+            <p className="muted">
+              Admins and agents can review live auction activity here without bidding controls.
+            </p>
+            <div className="ticket-status">
+              <span>Current Highest Bid</span>
+              <strong>NPR {Number(auction.current_price || 0).toLocaleString()}</strong>
+            </div>
+            <div className="ticket-status">
+              <span>Starting Price</span>
+              <strong>NPR {Number(auction.starting_price || 0).toLocaleString()}</strong>
+            </div>
+          </div>
+        )}
+
+        {canReviewBids ? (
+          <div className="panel contract-panel">
+            <div className="contract-panel-header">
+              <div>
+                <h2>Offered Bids</h2>
+                <p className="muted">
+                  Visible to the owner, admin, and agent for this auction.
+                </p>
+              </div>
+              <div className="ticket-status bid-summary-status">
+                <span>Total Offers</span>
+                <strong>{bids.length}</strong>
+              </div>
+            </div>
+            {bidsStatus.message ? (
+              <p className={`status ${bidsStatus.type}`}>{bidsStatus.message}</p>
+            ) : bids.length ? (
+              <div className="bid-review-list">
+                {bids.map((bid) => (
+                  <div key={bid.id} className="bid-review-item">
+                    <div>
+                      <strong>
+                        {bid.firstname} {bid.lastname}
+                      </strong>
+                      <span>{formatDateTime(bid.bid_time)}</span>
+                    </div>
+                    <div className="bid-review-meta">
+                      <strong>NPR {Number(bid.bid_amount).toLocaleString()}</strong>
+                      <span className={`badge ${bid.status || "pending"}`}>
+                        {bid.status || "pending"}
+                      </span>
+                      {String(bid.status || "pending").toLowerCase() === "pending" ? (
+                        <div className="panel-actions">
+                          <button
+                            type="button"
+                            className="mini-action"
+                            onClick={() => handleReviewBid(bid.id, "accepted")}
+                            disabled={reviewingBidId === bid.id}
+                          >
+                            {reviewingBidId === bid.id ? "Saving..." : "Accept"}
+                          </button>
+                          <button
+                            type="button"
+                            className="mini-action danger"
+                            onClick={() => handleReviewBid(bid.id, "rejected")}
+                            disabled={reviewingBidId === bid.id}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="muted">No bids have been offered yet.</p>
+            )}
+          </div>
+        ) : null}
+
+        {contract ? (
+          <div className="panel contract-panel">
+            <div className="contract-panel-header">
+              <div>
+                <h2>Sale Contract</h2>
+                <p className="muted">
+                  View the finalized contract in English or Nepali.
+                </p>
+              </div>
+              <div className="contract-language" role="group" aria-label="Contract language">
+                <span>Language</span>
+                <div className="contract-language-toggle">
+                  <button
+                    type="button"
+                    className={contractLanguage === "en" ? "is-active" : ""}
+                    onClick={() => setContractLanguage("en")}
+                    aria-pressed={contractLanguage === "en"}
+                  >
+                    English
+                  </button>
+                  <button
+                    type="button"
+                    className={contractLanguage === "ne" ? "is-active" : ""}
+                    onClick={() => setContractLanguage("ne")}
+                    aria-pressed={contractLanguage === "ne"}
+                  >
+                    Nepali
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="ticket-status">
+              <span>Contract Status</span>
+              <strong>Accepted Bid</strong>
+            </div>
+            <pre className="agreement-text">{contractText}</pre>
+          </div>
+        ) : null}
       </section>
     </div>
   );

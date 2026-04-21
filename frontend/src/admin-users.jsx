@@ -127,6 +127,7 @@ export default function AdminUsers() {
                         <strong>
                           {user.firstname} {user.lastname}
                         </strong>
+                        <span>Requested role: {user.role_name || "user"}</span>
                         <span>{user.email}</span>
                         <span>{user.number}</span>
                       </div>

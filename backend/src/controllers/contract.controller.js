@@ -1,1 +1,4 @@
-export { default as getContractHandler } from "./contract/getContractHandler.js";
+export {
+  getContractByBidHandler,
+  getContractByTransactionHandler,
+} from "./contract/getContractHandler.js";

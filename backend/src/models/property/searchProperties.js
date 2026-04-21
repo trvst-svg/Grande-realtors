@@ -46,6 +46,9 @@ export default async function searchProperties({
   if (status) {
     values.push(status);
     conditions.push(`p.sale_status = $${values.length}`);
+  } else {
+    // Public search should only surface currently available inventory.
+    conditions.push(`COALESCE(p.sale_status, 'available') = 'available'`);
   }
 
   conditions.push(

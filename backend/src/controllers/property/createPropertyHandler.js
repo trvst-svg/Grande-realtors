@@ -6,7 +6,6 @@ import {
   createPropertyVerificationRequest,
   getPropertyTypeIdByName,
 } from "../../models/property.model.js";
-import { getRoleIdByName } from "../../models/user.model.js";
 
 export default async function createPropertyHandler(req, res, next) {
   try {
@@ -17,7 +16,6 @@ export default async function createPropertyHandler(req, res, next) {
       description,
       price,
       sale_status,
-      listing_purpose,
       listing_type,
       images,
       land,
@@ -30,14 +28,6 @@ export default async function createPropertyHandler(req, res, next) {
       return res.status(401).json({ error: "Authorization required" });
     }
 
-    const sellerRoleId = await getRoleIdByName("seller");
-    const userRoleId = await getRoleIdByName("user");
-    const isSeller =
-      req.user?.role_id === sellerRoleId || req.user?.role_id === userRoleId;
-    if (!isSeller) {
-      return res.status(403).json({ error: "Only sellers can list properties" });
-    }
-
     if (!location || !price || (!property_type && !property_type_id)) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -45,11 +35,6 @@ export default async function createPropertyHandler(req, res, next) {
     const allowedTypes = ["land", "house"];
     if (property_type && !allowedTypes.includes(property_type)) {
       return res.status(400).json({ error: "Invalid property type" });
-    }
-
-    const allowedPurposes = ["sale", "bidding"];
-    if (listing_purpose && !allowedPurposes.includes(listing_purpose)) {
-      return res.status(400).json({ error: "Invalid listing purpose" });
     }
 
     const allowedListingTypes = [
@@ -77,7 +62,7 @@ export default async function createPropertyHandler(req, res, next) {
       location,
       description: description || null,
       price,
-      listing_purpose: listing_purpose || "sale",
+      listing_purpose: "sale",
       listing_type: listing_type || null,
       sale_status: sale_status || "available",
     });

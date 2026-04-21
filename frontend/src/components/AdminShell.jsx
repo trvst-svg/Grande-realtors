@@ -35,7 +35,7 @@ export default function AdminShell({ title, subtitle, children }) {
             User Approvals
           </NavLink>
           <NavLink to="/dashboard/admin/properties" className={navClass}>
-            Property Approvals
+            Properties & Auctions
           </NavLink>
         </nav>
         <div className="admin-actions">

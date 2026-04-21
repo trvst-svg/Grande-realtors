@@ -29,10 +29,13 @@ export default function AgentShell({ title, subtitle, children }) {
         </div>
         <nav className="admin-nav">
           <NavLink end to="/dashboard/agent" className={navClass}>
-            Overview
+            Dashboard
           </NavLink>
           <NavLink to="/dashboard/agent/properties" className={navClass}>
-            Property Approvals
+            Property Requests
+          </NavLink>
+          <NavLink to="/dashboard/agent/assigned-properties" className={navClass}>
+            Assigned Properties
           </NavLink>
         </nav>
         <div className="admin-actions">

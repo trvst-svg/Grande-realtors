@@ -47,9 +47,15 @@ async function lookupKhaltiPayment(pidx) {
   return data;
 }
 
+function isKhaltiPaidStatus(status) {
+  const normalized = String(status || "").trim().toLowerCase();
+  return normalized === "completed";
+}
+
 export default async function handleKhaltiReturn(req, res, next) {
   try {
-    const { pidx } = req.query;
+    const { pidx, purchase_order_id: purchaseOrderId, status: callbackStatus } =
+      req.query;
     const frontendBase = getFrontendBaseUrl(req);
 
     if (!pidx) {
@@ -57,8 +63,8 @@ export default async function handleKhaltiReturn(req, res, next) {
     }
 
     const lookup = await lookupKhaltiPayment(pidx);
-    const status = lookup.status;
-    const transactionUuid = lookup.purchase_order_id;
+    const status = lookup.status || callbackStatus;
+    const transactionUuid = purchaseOrderId;
 
     if (!transactionUuid) {
       return res.redirect(`${frontendBase}/bidding?payment=failed`);
@@ -79,7 +85,7 @@ export default async function handleKhaltiReturn(req, res, next) {
       return res.redirect(`${frontendBase}/bidding?payment=failed`);
     }
 
-    if (status === "Completed") {
+    if (isKhaltiPaidStatus(status)) {
       // Return handlers can be revisited, so keep the state transition idempotent.
       if (ticket.status !== "paid") {
         await markBidTicketPaid({

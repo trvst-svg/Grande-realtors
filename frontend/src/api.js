@@ -142,13 +142,13 @@ export async function resetPassword(payload) {
 
 export async function logoutUser() {
   const refreshToken = getRefreshToken();
+  clearAuthStorage();
   await fetch(`${API_BASE_URL}/api/auth/logout`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify(refreshToken ? { refresh_token: refreshToken } : {}),
   }).catch(() => {});
-  clearAuthStorage();
 }
 
 export async function signupUser(formData) {
@@ -194,22 +194,6 @@ export async function fetchProperty(propertyId) {
   return data;
 }
 
-export async function sendPropertyInquiry(propertyId, payload) {
-  const response = await authFetch(
-    `${API_BASE_URL}/api/properties/${propertyId}/inquiry`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Unable to send inquiry");
-  }
-  return data;
-}
-
 export async function fetchPropertyBookmarkStatus(propertyId) {
   const response = await authFetch(
     `${API_BASE_URL}/api/properties/${propertyId}/favorite`
@@ -249,6 +233,75 @@ export async function removePropertyBookmark(propertyId) {
   return data;
 }
 
+export async function submitPropertyInquiry(propertyId, payload) {
+  const response = await authFetch(
+    `${API_BASE_URL}/api/properties/${propertyId}/inquiries`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to submit inquiry");
+  }
+  return data;
+}
+
+export async function fetchPropertyInquiries(propertyId) {
+  const response = await authFetch(`${API_BASE_URL}/api/properties/${propertyId}/inquiries`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load inquiries");
+  }
+  return data.items || [];
+}
+
+export async function fetchMessageThreads() {
+  const response = await authFetch(`${API_BASE_URL}/api/messages/threads`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load message threads");
+  }
+  return data.items || [];
+}
+
+export async function fetchMessageThread(inquiryId) {
+  const response = await authFetch(`${API_BASE_URL}/api/messages/inquiries/${inquiryId}`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load thread");
+  }
+  return data;
+}
+
+export async function sendInquiryMessage(inquiryId, message) {
+  const response = await authFetch(`${API_BASE_URL}/api/messages/inquiries/${inquiryId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to send message");
+  }
+  return data;
+}
+
+export async function completePropertySale(propertyId, payload) {
+  const response = await authFetch(`${API_BASE_URL}/api/properties/${propertyId}/complete-sale`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to complete property sale");
+  }
+  return data;
+}
+
 export async function fetchAuctions() {
   const response = await fetch(`${API_BASE_URL}/api/auctions`);
   const data = await response.json();
@@ -276,6 +329,46 @@ export async function fetchAuction(auctionId) {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load auction");
+  }
+  return data;
+}
+
+export async function updateAuctionStatus(auctionId, status) {
+  const response = await authFetch(`${API_BASE_URL}/api/auctions/${auctionId}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to update auction");
+  }
+  return data;
+}
+
+export async function fetchBidTicketAgreement(auctionId) {
+  const response = await authFetch(
+    `${API_BASE_URL}/api/auctions/${auctionId}/ticket-agreement`
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load agreement");
+  }
+  return data;
+}
+
+export async function acceptBidTicketAgreement(auctionId, language = "en") {
+  const response = await authFetch(
+    `${API_BASE_URL}/api/auctions/${auctionId}/ticket-agreement`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accepted: true, language }),
+    }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to accept agreement");
   }
   return data;
 }
@@ -431,6 +524,17 @@ export async function updateProperty(propertyId, payload) {
   return data;
 }
 
+export async function deletePropertyListing(propertyId) {
+  const response = await authFetch(`${API_BASE_URL}/api/properties/${propertyId}`, {
+    method: "DELETE",
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to delete property");
+  }
+  return data;
+}
+
 export async function uploadPropertyImages(propertyId, files) {
   const formData = new FormData();
   files.forEach((file) => formData.append("images", file));
@@ -492,42 +596,6 @@ export async function fetchSalesHandlerProfile(agentId) {
   return data;
 }
 
-export async function fetchMessageThreads() {
-  const response = await authFetch(`${API_BASE_URL}/api/messages/threads`);
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Unable to load messages");
-  }
-  return data.items || [];
-}
-
-export async function fetchMessageThread(propertyId, participantId) {
-  const params = new URLSearchParams();
-  if (propertyId) params.set("property_id", propertyId);
-  if (participantId) params.set("participant_id", participantId);
-  const response = await authFetch(
-    `${API_BASE_URL}/api/messages/thread?${params.toString()}`
-  );
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Unable to load conversation");
-  }
-  return data;
-}
-
-export async function sendMessage(payload) {
-  const response = await authFetch(`${API_BASE_URL}/api/messages`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Unable to send message");
-  }
-  return data;
-}
-
 export async function fetchAuctionBids(auctionId) {
   const response = await authFetch(`${API_BASE_URL}/api/auctions/${auctionId}/bids`);
   const data = await response.json();
@@ -563,7 +631,18 @@ export async function updateBidStatus(auctionId, bidId, status) {
 }
 
 export async function fetchContract(bidId) {
-  const response = await authFetch(`${API_BASE_URL}/api/contracts/${bidId}`);
+  const response = await authFetch(`${API_BASE_URL}/api/contracts/bid/${bidId}`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load contract");
+  }
+  return data.contract;
+}
+
+export async function fetchTransactionContract(transactionId) {
+  const response = await authFetch(
+    `${API_BASE_URL}/api/contracts/transaction/${transactionId}`
+  );
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to load contract");
@@ -580,6 +659,30 @@ export async function submitSellerRating(payload) {
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Unable to submit rating");
+  }
+  return data;
+}
+
+export async function submitRating(payload) {
+  const response = await authFetch(`${API_BASE_URL}/api/ratings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to submit rating");
+  }
+  return data;
+}
+
+export async function fetchUserRatings(userId, roleType) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/ratings/user/${userId}?role_type=${encodeURIComponent(roleType)}`
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load ratings");
   }
   return data;
 }

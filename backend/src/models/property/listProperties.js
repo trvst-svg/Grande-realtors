@@ -22,7 +22,8 @@ export default async function listProperties() {
        ORDER BY id DESC
        LIMIT 1
      ) pvr ON true
-     WHERE pvr.request_status IS NULL OR pvr.request_status = 'approved'
+     WHERE (pvr.request_status IS NULL OR pvr.request_status = 'approved')
+       AND COALESCE(p.sale_status, 'available') = 'available'
      ORDER BY p.listed_date DESC`
   );
   return result.rows;

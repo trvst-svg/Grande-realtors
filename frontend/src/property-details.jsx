@@ -7,8 +7,7 @@ import {
   fetchUserProfile,
   addPropertyBookmark,
   removePropertyBookmark,
-  sendPropertyInquiry,
-  sendMessage,
+  submitPropertyInquiry,
 } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import "./property-details.css";
@@ -40,12 +39,10 @@ export default function PropertyDetailsPage() {
     message: "",
   });
   const [sending, setSending] = useState(false);
-  const [inquiryStatus, setInquiryStatus] = useState({ type: "", message: "" });
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarking, setBookmarking] = useState(false);
   const [bookmarkStatus, setBookmarkStatus] = useState({ type: "", message: "" });
-  const [messageDraft, setMessageDraft] = useState("");
-  const [messageStatus, setMessageStatus] = useState({ type: "", message: "" });
+  const [inquiryStatus, setInquiryStatus] = useState({ type: "", message: "" });
   const hasToken =
     typeof window !== "undefined" && Boolean(localStorage.getItem("gr_token"));
 
@@ -333,7 +330,7 @@ export default function PropertyDetailsPage() {
               <span className="label">Seller Rating</span>
               <p>
                 {property.seller_rating
-                  ? `${property.seller_rating.avg_rating} (${property.seller_rating.rating_count})`
+                  ? `${property.seller_rating.avg_rating} (${property.seller_rating.review_count})`
                   : "Not rated"}
               </p>
             </div>
@@ -346,7 +343,7 @@ export default function PropertyDetailsPage() {
 
           <div className="details-contact-inline">
             <div>
-              <h3>Contact Sales Handler</h3>
+              <h3>Assigned Sales Handler</h3>
               {salesHandler ? (
                 <div className="handler-info">
                   <p className="handler-name">
@@ -361,9 +358,6 @@ export default function PropertyDetailsPage() {
               ) : (
                 <p className="handler-empty">No sales handler assigned.</p>
               )}
-              {!hasToken ? (
-                <p className="handler-empty">Sign in to send an inquiry.</p>
-              ) : null}
               {isOwner ? (
                 <p className="handler-empty">
                   This is your property. Manage it from your profile.
@@ -371,157 +365,142 @@ export default function PropertyDetailsPage() {
               ) : null}
             </div>
 
-            <div className="contact-form">
-              <h4>Send an inquiry</h4>
-              <p className="muted">
-                We will automatically include the property details in your message.
-              </p>
-              {!hasToken ? (
-                <p className="status error">
-                  Please sign in to contact the sales handler.
+            {!isOwner ? (
+              <div className="contact-form">
+                <h4>Send an inquiry</h4>
+                <p className="muted">
+                  We will automatically include the property details in your message.
                 </p>
-              ) : null}
-              {isOwner ? (
-                <p className="status error">
-                  Owners cannot contact their own property.
-                </p>
-              ) : null}
-              <form
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  setInquiryStatus({ type: "", message: "" });
-                  setSending(true);
-                  try {
-                    const data = await sendPropertyInquiry(property.id, inquiry);
-                    setInquiryStatus({
-                      type: "success",
-                      message: data.message || "Inquiry sent.",
-                    });
-                    setInquiry((prev) => ({ ...prev, message: "" }));
-                  } catch (err) {
-                    setInquiryStatus({ type: "error", message: err.message });
-                  } finally {
-                    setSending(false);
-                  }
-                }}
-              >
-                <label htmlFor="inquiry-name">Full Name</label>
-                <input
-                  id="inquiry-name"
-                  type="text"
-                  value={inquiry.name}
-                  onChange={(event) =>
-                    setInquiry((prev) => ({ ...prev, name: event.target.value }))
-                  }
-                  required
-                  disabled={!salesHandler || !hasToken || isOwner}
-                />
-
-                <label htmlFor="inquiry-email">Email</label>
-                <input
-                  id="inquiry-email"
-                  type="email"
-                  value={inquiry.email}
-                  onChange={(event) =>
-                    setInquiry((prev) => ({ ...prev, email: event.target.value }))
-                  }
-                  required
-                  disabled={!salesHandler || !hasToken || isOwner}
-                />
-
-                <label htmlFor="inquiry-phone">Phone (optional)</label>
-                <input
-                  id="inquiry-phone"
-                  type="text"
-                  value={inquiry.phone}
-                  onChange={(event) =>
-                    setInquiry((prev) => ({ ...prev, phone: event.target.value }))
-                  }
-                  disabled={!salesHandler || !hasToken || isOwner}
-                />
-
-                <label htmlFor="inquiry-message">Message</label>
-                <textarea
-                  id="inquiry-message"
-                  rows="4"
-                  value={inquiry.message}
-                  onChange={(event) =>
-                    setInquiry((prev) => ({ ...prev, message: event.target.value }))
-                  }
-                  required
-                  disabled={!salesHandler || !hasToken || isOwner}
-                  placeholder="Tell us what you are looking for."
-                />
-
-                {inquiryStatus.message ? (
-                  <p className={`status ${inquiryStatus.type}`}>
-                    {inquiryStatus.message}
+                {!hasToken ? (
+                  <p className="status error">
+                    Please sign in to contact the sales handler.
                   </p>
                 ) : null}
-
-                <button
-                  type="submit"
-                  disabled={!salesHandler || !hasToken || isOwner || sending}
+                {isOwner ? (
+                  <p className="status error">
+                    Owners cannot contact their own property.
+                  </p>
+                ) : null}
+                {!salesHandler ? (
+                  <p className="muted">Inquiry is unavailable until a sales handler is assigned.</p>
+                ) : null}
+                <form
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    setInquiryStatus({ type: "", message: "" });
+                    setSending(true);
+                    try {
+                      const data = await submitPropertyInquiry(property.id, inquiry);
+                      setInquiryStatus({
+                        type: "success",
+                        message: data.message || "Inquiry sent.",
+                      });
+                      setInquiry((prev) => ({ ...prev, message: "" }));
+                    } catch (err) {
+                      setInquiryStatus({ type: "error", message: err.message });
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
                 >
-                  {sending ? "Sending..." : "Send Inquiry"}
-                </button>
-              </form>
+                  <label htmlFor="inquiry-name">Full Name</label>
+                  <input
+                    id="inquiry-name"
+                    type="text"
+                    value={inquiry.name}
+                    onChange={(event) =>
+                      setInquiry((prev) => ({ ...prev, name: event.target.value }))
+                    }
+                    required
+                    disabled={!salesHandler || !hasToken || isOwner || sending}
+                  />
+
+                  <label htmlFor="inquiry-email">Email</label>
+                  <input
+                    id="inquiry-email"
+                    type="email"
+                    value={inquiry.email}
+                    onChange={(event) =>
+                      setInquiry((prev) => ({ ...prev, email: event.target.value }))
+                    }
+                    required
+                    disabled={!salesHandler || !hasToken || isOwner || sending}
+                  />
+
+                  <label htmlFor="inquiry-phone">Phone (optional)</label>
+                  <input
+                    id="inquiry-phone"
+                    type="text"
+                    value={inquiry.phone}
+                    onChange={(event) =>
+                      setInquiry((prev) => ({ ...prev, phone: event.target.value }))
+                    }
+                    disabled={!salesHandler || !hasToken || isOwner || sending}
+                  />
+
+                  <label htmlFor="inquiry-message">Message</label>
+                  <textarea
+                    id="inquiry-message"
+                    rows="4"
+                    value={inquiry.message}
+                    onChange={(event) =>
+                      setInquiry((prev) => ({ ...prev, message: event.target.value }))
+                    }
+                    required
+                    disabled={!salesHandler || !hasToken || isOwner || sending}
+                    placeholder="Tell us what you are looking for."
+                  />
+
+                  {inquiryStatus.message ? (
+                    <p className={`status ${inquiryStatus.type}`}>
+                      {inquiryStatus.message}
+                    </p>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    disabled={!salesHandler || !hasToken || isOwner || sending}
+                  >
+                    {sending ? "Sending..." : "Send Inquiry"}
+                  </button>
+                </form>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="details-feedback-grid">
+            <div className="feedback-card">
+              <h3>Seller Feedback</h3>
+              {property.seller_rating?.recent_feedback?.length ? (
+                property.seller_rating.recent_feedback.map((item) => (
+                  <div key={item.id} className="feedback-item">
+                    <strong>{item.stars}/5</strong>
+                    <p>{item.review || "No written review."}</p>
+                    <span>
+                      {item.buyer_firstname} {item.buyer_lastname}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="muted">No seller feedback yet.</p>
+              )}
             </div>
 
-            <div className="contact-form">
-              <h4>Message the Owner</h4>
-              <p className="muted">
-                Use in-app messaging to contact the property owner directly.
-              </p>
-              {!hasToken ? (
-                <p className="status error">
-                  Please sign in to send a message.
-                </p>
-              ) : null}
-              {isOwner ? (
-                <p className="status error">
-                  Owners cannot message themselves.
-                </p>
-              ) : null}
-              <form
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  setMessageStatus({ type: "", message: "" });
-                  try {
-                    await sendMessage({
-                      property_id: property.id,
-                      receiver_id: property.owner_id,
-                      body: messageDraft,
-                    });
-                    setMessageDraft("");
-                    setMessageStatus({
-                      type: "success",
-                      message: "Message sent. Check Messages for replies.",
-                    });
-                  } catch (err) {
-                    setMessageStatus({ type: "error", message: err.message });
-                  }
-                }}
-              >
-                <label htmlFor="message-body">Message</label>
-                <textarea
-                  id="message-body"
-                  rows="4"
-                  value={messageDraft}
-                  onChange={(event) => setMessageDraft(event.target.value)}
-                  required
-                  disabled={!hasToken || isOwner}
-                  placeholder="Ask about this property..."
-                />
-                {messageStatus.message ? (
-                  <p className={`status ${messageStatus.type}`}>
-                    {messageStatus.message}
-                  </p>
-                ) : null}
-                <button type="submit" disabled={!hasToken || isOwner}>
-                  Send Message
-                </button>
-              </form>
+            <div className="feedback-card">
+              <h3>Handler Feedback</h3>
+              {property.handler_rating?.recent_feedback?.length ? (
+                property.handler_rating.recent_feedback.map((item) => (
+                  <div key={item.id} className="feedback-item">
+                    <strong>{item.stars}/5</strong>
+                    <p>{item.review || "No written review."}</p>
+                    <span>
+                      {item.buyer_firstname} {item.buyer_lastname}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="muted">No handler feedback yet.</p>
+              )}
             </div>
           </div>
 

@@ -143,9 +143,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="panel">
-          <h2>Pending Approvals</h2>
+          <h2>Admin Queue</h2>
           <p className="muted">
-            {requestsError || "Track approvals waiting for review."}
+            {requestsError || "Track approvals and jump into listing controls."}
           </p>
           <div className="approval-grid">
             <div className="approval-card">
@@ -159,9 +159,17 @@ export default function AdminDashboard() {
             <div className="approval-card">
               <span>Property Requests</span>
               <strong>{pendingProperties}</strong>
-              <p className="muted">Approve property listings.</p>
+              <p className="muted">Approve new property listings.</p>
               <Link className="text-link" to="/dashboard/admin/properties">
                 Review properties →
+              </Link>
+            </div>
+            <div className="approval-card">
+              <span>Listing Controls</span>
+              <strong>Manage</strong>
+              <p className="muted">Close active property listings and live auctions.</p>
+              <Link className="text-link" to="/dashboard/admin/properties">
+                Open controls →
               </Link>
             </div>
           </div>

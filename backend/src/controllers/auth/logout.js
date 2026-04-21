@@ -1,6 +1,6 @@
 import { getRefreshTokenByHash, revokeRefreshToken } from "../../models/refreshToken.model.js";
 import {
-  buildRefreshCookieOptions,
+  buildRefreshCookieClearOptions,
   getRefreshTokenCookieName,
   hashRefreshToken,
 } from "../../utils/refreshToken.js";
@@ -20,7 +20,10 @@ export default async function logout(req, res, next) {
       }
     }
 
-    res.clearCookie(getRefreshTokenCookieName(), buildRefreshCookieOptions());
+    res.clearCookie(
+      getRefreshTokenCookieName(),
+      buildRefreshCookieClearOptions()
+    );
     return res.json({ message: "Logged out" });
   } catch (err) {
     return next(err);

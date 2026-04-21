@@ -9,7 +9,7 @@ const initialForm = {
   email: "",
   number: "",
   password: "",
-  role: "buyer",
+  role: "user",
   citizenshipFront: null,
   citizenshipBack: null,
   agree: false,
@@ -52,6 +52,7 @@ export default function SignupPage() {
     payload.append("email", form.email);
     payload.append("number", form.number);
     payload.append("password", form.password);
+    payload.append("role", "user");
     payload.append("citizenshipFront", form.citizenshipFront);
     payload.append("citizenshipBack", form.citizenshipBack);
 
